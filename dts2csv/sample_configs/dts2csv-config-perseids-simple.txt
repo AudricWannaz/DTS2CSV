@@ -1,0 +1,24 @@
+
+
+
+DTS_URL=https://dts.perseids.org/
+START_COLLECTION_ID=urn:perseids:latinLit
+MAX_DEPTH=None
+RETRIEVE_FILES=True
+TRANSFORM_TEI_TO_TXT=True
+TRANSFORM_TEI_TO_HTML=False
+INLINE_TXT_IN_CSV=True
+
+# only needed if TRANSFORM_TEI_TO_TXT or TRANSFORM_TEI_TO_HTML is used
+SAXON_JAR_PATH=HOME+"/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar"
+TEI_XSL_STYLESHEETS_PATH=HOME+"/dev/tei/install/tei-xsl"
+
+# <DTS_ID>[ => <CSV_COL_NAME>]
+COLLECTIONS:
+totalItems => nbChildren
+title => csvName
+
+RESOURCES:
+title
+description
+dts:dublincore/dc:language => language
