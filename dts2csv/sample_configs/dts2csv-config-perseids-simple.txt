@@ -1,6 +1,4 @@
 
-
-
 DTS_URL=https://dts.perseids.org/
 START_COLLECTION_ID=urn:perseids:latinLit
 MAX_DEPTH=None
@@ -16,7 +14,7 @@ TEI_XSL_STYLESHEETS_PATH=HOME+"/dev/tei/install/tei-xsl"
 # <DTS_ID>[ => <CSV_COL_NAME>]
 COLLECTIONS:
 totalItems => nbChildren
-title => csvName
+title
 
 RESOURCES:
 title
