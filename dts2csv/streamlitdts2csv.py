@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream:dts2csv/streamlitdts2csv.py
 #imports
 import streamlit as st
 from os.path import expanduser
@@ -7,13 +8,26 @@ def opening_style():
     col1, col2 = st.columns(2)
     col1.title(' Welcome to DTS2CSV!')
     col2.image('logo.png')
+=======
+
+import streamlit as st
+from os.path import expanduser
+
+def opening_style():
+    st.title(' Welcome to DTS2CSV!')
+    #
+>>>>>>> Stashed changes:dst2csv/streamlitdts2csv.py
     st.header('convert any DTS data in a CSV within seconds')
 
     # stuff happens
 
 def closing_style():
+<<<<<<< Updated upstream:dts2csv/streamlitdts2csv.py
     st.write('This tool war written during the DTS Hackathon (https://distributed-text-services.github.io/workshops/events/2021-hackathon/). License=open(which one?). '
              'Please refer to this software as following: DTS2CSV Ver 1.0 by Laurent ML (backend) and Audric Wannaz (streamlit GUI)')
+=======
+    st.write('This tool war written during the DTS Hackathon (LINK). License=... Please refer to this software as following:')
+>>>>>>> Stashed changes:dst2csv/streamlitdts2csv.py
 
 def about():
 
@@ -30,20 +44,59 @@ def about():
 
     st.write(infos)
 
+<<<<<<< Updated upstream:dts2csv/streamlitdts2csv.py
 def main():
     if 'url' not in st.session_state:
         get_url_input()
 
 # main code
+=======
+def get_url_input():
+    with st.form('url_form'):
+        url_input = st.text_input('To start, enter an url: ')
+        submit_url = st.form_submit_button('GO')
+        if submit_url:
+            st.session_state.url = url_input
+
+
+    st.image('logo.png')
+
+opening_style()
+
+if 'url' not in st.session_state:
+    get_url_input()
+    st.stop()
+    #st.session_state.key = 'value'
+#else:
+ #   main_window()
+# def main_window():
+    #start here again
+
+# at the end of main_window:
+reset_app = st.button('RESET')
+
+if reset_app:
+    del st.session_state['url']
+
+>>>>>>> Stashed changes:dst2csv/streamlitdts2csv.py
 
 # doing the sidebar
 mode = st.sidebar.selectbox('choose a mode:', ['DTS2CSV', 'DTS2PDF', 'Load input file', 'Manual input (main mode)','Settings'])
+<<<<<<< Updated upstream:dts2csv/streamlitdts2csv.py
+=======
+st.sidebar.image('logo.png')
+
+>>>>>>> Stashed changes:dst2csv/streamlitdts2csv.py
 # settings in sidebar
 out_name = st.sidebar.text_input('Name of the CSV file: ', 'output')
 out = False
 
+<<<<<<< Updated upstream:dts2csv/streamlitdts2csv.py
 # main window
 opening_style()
+=======
+
+>>>>>>> Stashed changes:dst2csv/streamlitdts2csv.py
 
 #def dtscsv_input():
 
@@ -53,12 +106,12 @@ home = expanduser("~")
 # only needed if TRANSFORM_TEI_TO_TXT or TRANSFORM_TEI_TO_HTML are set to True
 SAXON_JAR_PATH=home+"/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar"
 
-## Path to TEI-XSL Stylesheets
-## only needed if TRANSFORM_TEI_TO_TXT or TRANSFORM_TEI_TO_HTML are set to True
-## shall contain at least following files:
-## <TEI_XSL_STYLESHEETS_PATH>/html5/html5.xsl
-## <TEI_XSL_STYLESHEETS_PATH>/txt/tei-to-text.xsl
-TEI_XSL_STYLESHEETS_PATH=home+"/dev/tei/install/tei-xsl"
+
+def tei():
+    ## Path to TEI-XSL Stylesheets
+    ## <TEI_XSL_STYLESHEETS_PATH>/html5/html5.xsl
+    ## <TEI_XSL_STYLESHEETS_PATH>/txt/tei-to-text.xsl
+    TEI_XSL_STYLESHEETS_PATH=home+"/dev/tei/install/tei-xsl"
 
 # API URLs
 rootUrl="https://dev.chartes.psl.eu/api/nautilus/dts/"
