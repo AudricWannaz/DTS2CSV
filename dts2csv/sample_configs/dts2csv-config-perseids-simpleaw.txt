@@ -1,0 +1,13 @@
+DTS_URL=https://dts.perseids.org/
+START_COLLECTION_ID=urn:perseids:latinLit
+MAX_DEPTH=None
+RETRIEVE_FILES=True
+TRANSFORM_TEI_TO_TXT=True
+TRANSFORM_TEI_TO_HTML=False
+INLINE_TXT_IN_CSV=True
+SAXON_JAR_PATH=HOME+"/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar"
+TEI_XSL_STYLESHEETS_PATH=HOME+"/dev/tei/install/tei-xsl"
+
+# well have something like
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9]

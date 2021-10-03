@@ -1,19 +1,23 @@
+#imports
+import streamlit as st
+from os.path import expanduser
+
+# functions
 def opening_style():
-    st.title(' Welcome to DTS2CSV!')
+    col1, col2 = st.columns(2)
+    col1.title(' Welcome to DTS2CSV!')
+    col2.image('logo.png')
     st.header('convert any DTS data in a CSV within seconds')
 
     # stuff happens
 
 def closing_style():
-    st.write('This tool war written during the DTS Hackathon (LINK). License=... Please refer to this software as following:')
-
+    st.write('This tool war written during the DTS Hackathon (https://distributed-text-services.github.io/workshops/events/2021-hackathon/). License=open(which one?). '
+             'Please refer to this software as following: DTS2CSV Ver 1.0 by Laurent ML (backend) and Audric Wannaz (streamlit GUI)')
 
 def about():
 
-    infos ='''Demo config file for dts2csv.py from MetaindeX Toolbox https://metaindex.fr/webapp/toolbox
-
-     In this example, we retrieve data related to theses of Ecole des Chartes from year 2012 via DTS API.
-
+    infos ='''Dts2csv is also a part of the MetaindeX Toolbox https://metaindex.fr/webapp/toolbox
     Author: Laurent ML - metaindex.fr + Audric Wannaz 2021
     If you find this tools useful somehow, please reference MetaindeX project when possible.
      
@@ -26,26 +30,20 @@ def about():
 
     st.write(infos)
 
+def main():
+    if 'url' not in st.session_state:
+        get_url_input()
 
-
-
-import streamlit as st
-from os.path import expanduser
-
+# main code
 
 # doing the sidebar
-
 mode = st.sidebar.selectbox('choose a mode:', ['DTS2CSV', 'DTS2PDF', 'Load input file', 'Manual input (main mode)','Settings'])
-
 # settings in sidebar
-
 out_name = st.sidebar.text_input('Name of the CSV file: ', 'output')
-
-
 out = False
 
+# main window
 opening_style()
-
 
 #def dtscsv_input():
 
@@ -177,17 +175,8 @@ def gui_main():
 
 closing_style()
 
-# to do list:
-# work on a more sophisticated collection id input
-# make depth button nicer
+# to do:
 # adjust code in dtscsv.py and config.py
 
-
-
-
-#more settings?
-
-# mode switcher can wait , pietro did not answer yet
-# nice logo
 
 
