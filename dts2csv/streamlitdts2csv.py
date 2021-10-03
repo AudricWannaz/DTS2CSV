@@ -1,9 +1,10 @@
+# questions to Laurent are noted with *
 
 #imports
 import streamlit as st
 from os.path import expanduser
 
-st.write('test1')
+#st.write('test1')
 
 # functions
 def opening_style():
@@ -16,8 +17,9 @@ def opening_style():
 def closing_style():
     st.image('logo.png')
     #add collapser bar
-    about()
-    st.write('This tool war written during the DTS Hackathon (https://distributed-text-services.github.io/workshops/events/2021-hackathon/). License=open(which one?). '
+    with st.expander('CREDITS'):
+        about()
+        st.write('This tool war written during the DTS Hackathon (https://distributed-text-services.github.io/workshops/events/2021-hackathon/). License=open(which one?). '
              'Please refer to this software as following: DTS2CSV Ver 1.0 by Laurent ML (backend) and Audric Wannaz (streamlit GUI)')
 
 def about():
@@ -38,11 +40,33 @@ def check_url(): #if no url in session states, launches start screen, else passe
     if 'url' not in st.session_state:
         get_url_input()
         st.stop()
+    else:
+        import requests
+        try:
+            response = requests.get(st.session_state.url)
+        except:
+            st.error('Not a valid URL')
+            del st.session_state['url']
+            back = st.button('BACK')
+            if back:
+                main()
+            st.stop()
+        if response.status_code == 200:
+            st.success('This URL seems valid! You can now select how you want to build your CSV')
+        else:
+            st.error('Web site does not exist')
+            back = st.button('BACK')
+            if back:
+                main()
+            st.stop()
+
+        # other errors to handle? like 404?
+
 
 def main():
-    st.write('test3')
+    #st.write('test3')
     opening_style()
-    st.write('test4')
+    #st.write('test4')
     check_url()
     screen_one()
     closing_style()
@@ -96,22 +120,24 @@ def form_screen_one(out_name):
     if submitted:
         out = [ROOT_COLLECTION_ID, MAX_DEPTH, RETRIEVE_FILES, TRANSFORM_TEI_TO_TXT, TRANSFORM_TEI_TO_HTML,
                 INLINE_TXT_IN_CSV]
+        st.write(out)
     if out:
-        st.download_button('DOWNLOAD', str(out), file_name=out_name + '.txt', mime=None, key=None, help=None,
-                            on_click=None, args=None, kwargs=None)
+        download_csv = st.download_button('DOWNLOAD', str(out), file_name=out_name + '.txt', mime=None, key=None, help=None,
+                            on_click=st.ballons(), args=None, kwargs=None)
+        # problem, right now, click on download_out creates a jump back
+        #if download_csv: revoir ca
+
+            #save used url in the correct folder
     else:
         st.stop()
 
-        # TARGET_PATH,
-
-        st.write('This is the current output of the GUI:')
-        st.write(out)
 
 def screen_one():
     screen1_vars()
-    st.write('test5')
+    #st.write('test5')
     #SB of screen1
     rootUrl = st.session_state.url
+    # * make default def_col, def_doc and if changed provide button to change it
     with st.sidebar.expander('+'):
         colls = st.text_input('Collections name:', 'collections')
         doc = st.text_input('Documents name:', 'document')
@@ -119,17 +145,24 @@ def screen_one():
         COLLECTIONS_URL = rootUrl + colls
         DOCUMENTS_URL = rootUrl + doc
         NAVIGATION_URL = rootUrl + navi  # 3 last are default this way and can be changed in sb
-        DATASET_ID = st.text_input('Dataset ID:', "thesesENC")
+        default_id = str(st.session_state.url)
+        DATASET_ID = st.text_input('Dataset ID:', default_id)
+        #make split of default id string
     out_name = st.sidebar.text_input('Name of the CSV file: ', 'output')
     st.sidebar.image('logo.png')
     form_screen_one(out_name)
+
     #
 
     #
     #END of screen1
     reset_app = st.button('RESET')
+    del st.session_state['url']
+    #from streamlit import caching
+    #caching.clear_cache()
     if reset_app:
-        del st.session_state['url']
+        #del st.session_state['url']
+        main()
 
 def get_url_input():
     with st.form('url_form'):
@@ -137,11 +170,17 @@ def get_url_input():
         submit_url = st.form_submit_button('GO')
         if submit_url:
             st.session_state.url = url_input
-
+    with st.expander('Use stored URLs'):
+        with st.form('url_form2'):
+            urls = ['https://streamlit.io/', 'https://scaife.perseus.org/library/'] # instead, have a line of code gather all the urls in the dedicated folder
+            url_input2 = st.selectbox('Pick one', urls)
+            submit_url2 = st.form_submit_button('GO')
+            if submit_url2:
+                st.session_state.url = url_input2
 
 
 # main code
-st.write('test2')
+#st.write('test2')
 if __name__ == '__main__':
     main()
 
@@ -155,66 +194,55 @@ st.stop()
 def use_later_maybe():
     mode = st.sidebar.selectbox('choose a mode:', ['DTS2CSV', 'DTS2PDF', 'Load input file', 'Manual input (main mode)','Settings'])
 
+    # This function is called every time we try to download a TEI file
+    # if this function returns False we will skip the file
+    # it it returns True we will actually download it.
+    #
+    # * can this happen elsewhere?
+    # if this function is missing, it is assumed to be always True
+    def config_filterResource(resourceCsvData, resourceJsonData):
+        return True  # retrieve all TEI files
+        # return resourceCsvData["language"]=="en" # retrieve only TEI files marked as english language
+
+    # -------------------------------------------
+
+    # CSV ids might have some unicity or syntaxic constraints which can be handled here,
+    # to be compatible with Lucene query syntax (used by MetaindeX)
+    def config_idDts2idCsv(dtsId, dtsJsonData):
+        return dtsId.replace('urn:', '').replace(':', '.').replace('urn.',
+                                                                   '')  # the first replace must probably be fixed
+
+    # -------------------------------------------
+
+    # utility function called from DTS/CSV mapping table
+    # replace carriage return by "__CR__" string, so that it can stay in a single line in CSV file.
+    # this string is typically replaced back to carriage return when importing CSV file into metaindex app:
+    # "__CR__" is transcoded to newline by MetaindeX during import
+    # "__MX_ESCAPED_SEPARATOR__" is transcoded to ';' by MetaindeX during import
+    def normalizeText(text):
+        return text.replace("\n", "__CR__").replace("  ", " ").replace(";", "__MX_ESCAPED_SEPARATOR__")
+
+    # -------------------------------------------
+
+    # DTS/CSV mapping table
+    # list of DTS 'path' to put into CSV columns
+    # at least 'url', 'urn', '@id', 'members' (and 'parent'), and '@type' are generated by default, others shall be listed hereunder
+
+    # ask Laurent about that
+    ATTRS_LIST = {
+        "Collection": {"totalItems": {"csvName": "nbChildren", "mandatory": True},
+                       "title": {"csvName": "title", "mandatory": True, "transform": normalizeText},
+                       "dts:extensions/ns2:creator[0]/@value": {"csvName": "author", "mandatory": False},
+                       "dts:extensions/ns2:date": {"csvName": "date", "mandatory": False},
+                       },
+
+        "Resource": {
+            "dts:extensions/ns2:language": {"csvName": "language", "mandatory": True},
+
+        }
+    }
+
 # une fois fni premier clean aller regarder code non github et comms
 
-
-
-#REPRENDRE LA APRES MIDI
-
-# -------------------------------------------
-
-# This function is called every time we try to download a TEI file
-# if this function returns False we will skip the file
-# it it returns True we will actually download it.
-#
-# if this function is missing, it is assumed to be always True
-def config_filterResource(resourceCsvData,resourceJsonData):
-    return True # retrieve all TEI files
-    #return resourceCsvData["language"]=="en" # retrieve only TEI files marked as english language
-
-# CSV ids might have some unicity or syntaxic constraints which can be handled here,
-# to be compatible with Lucene query syntax (used by MetaindeX)
-def config_idDts2idCsv(dtsId,dtsJsonData):
-    return dtsId.replace('urn:','').replace(':','.').replace('urn.','') # the first replace must probably be fixed
-
-# -------------------------------------------
-
-# utility function called from DTS/CSV mapping table
-# replace carriage return by "__CR__" string, so that it can stay in a single line in CSV file.
-# this string is typically replaced back to carriage return when importing CSV file into metaindex app:
-# "__CR__" is transcoded to newline by MetaindeX during import
-# "__MX_ESCAPED_SEPARATOR__" is transcoded to ';' by MetaindeX during import
-def normalizeText(text):
-    return text.replace("\n","__CR__").replace("  "," ").replace(";","__MX_ESCAPED_SEPARATOR__")
-
-# -------------------------------------------
-
-# DTS/CSV mapping table
-# list of DTS 'path' to put into CSV columns
-# at least 'url', 'urn', '@id', 'members' (and 'parent'), and '@type' are generated by default, others shall be listed hereunder
-
-# ask Laurent about that
-ATTRS_LIST={
-     "Collection" :{ "totalItems" : {"csvName":"nbChildren", "mandatory":True}, 
-                    "title" : {"csvName":"title", "mandatory":True, "transform":normalizeText},
-                    "dts:extensions/ns2:creator[0]/@value" : {"csvName":"author", "mandatory":False},
-                    "dts:extensions/ns2:date" : {"csvName":"date", "mandatory":False},
-                },
-    
-    
-    "Resource":{ 
-                "dts:extensions/ns2:language" : {"csvName":"language", "mandatory":True},
-                
-                
-            }
- }
-
-def gui_main():
-    return gui_out
-
-
-closing_style()
-
-
-
+### !!! collaboration to plug in the vue js
 
