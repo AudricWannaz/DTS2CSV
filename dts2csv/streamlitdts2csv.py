@@ -10,6 +10,7 @@ from os.path import expanduser
 def opening_style():
     col1, col2 = st.columns(2)
     col1.title(' Welcome to DTS2CSV!')
+    col1.write('Hackathon Version, October 2021, Ver. 1.0')
     col2.image('logo.png')
     st.header('convert any DTS data in a CSV within seconds')
     # *want more?
@@ -64,6 +65,7 @@ def check_url(): #if no url in session states, launches start screen, else passe
 
 
 def main():
+    #see_saved_urls()
     #st.write('test3')
     opening_style()
     #st.write('test4')
@@ -123,13 +125,19 @@ def form_screen_one(out_name):
         st.write(out)
     if out:
         download_csv = st.download_button('DOWNLOAD', str(out), file_name=out_name + '.txt', mime=None, key=None, help=None,
-                            on_click=st.ballons(), args=None, kwargs=None)
+                            on_click=st.balloons, args=None, kwargs=None)
         # problem, right now, click on download_out creates a jump back
         #if download_csv: revoir ca
 
             #save used url in the correct folder
     else:
         st.stop()
+
+def see_saved_urls():
+    home = expanduser("~")
+    import os
+    url_files = os.listdir(r"C:\Users\Audric\Documents\GitHub\DTS2CSV\dts2csv\saved_urls")
+    st.write(url_files)
 
 
 def screen_one():
@@ -170,13 +178,21 @@ def get_url_input():
         submit_url = st.form_submit_button('GO')
         if submit_url:
             st.session_state.url = url_input
-    with st.expander('Use stored URLs'):
+    with st.expander('Use stored URLs instead'):
         with st.form('url_form2'):
+            #should expand this list
+            dts_urls = ['https://texts.alpheios.net/api/dts', 'https://dts.perseids.org/', 'https://betamasaheft.eu/api/dts', 'https://edh-www.adw.uni-heidelberg.de/api/dts/']
+            #just to try out
             urls = ['https://streamlit.io/', 'https://scaife.perseus.org/library/'] # instead, have a line of code gather all the urls in the dedicated folder
-            url_input2 = st.selectbox('Pick one', urls)
+            url_input2 = st.selectbox('Pick one', dts_urls)
             submit_url2 = st.form_submit_button('GO')
             if submit_url2:
                 st.session_state.url = url_input2
+    with st.expander('Help'):
+        '*insert small video demo hosted on YT?*'
+        'mention streamlit options on the upper right'
+    with st.expander('Settings'):
+        st.write('manage url list, ...')
 
 
 # main code
