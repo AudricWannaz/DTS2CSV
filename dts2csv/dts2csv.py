@@ -640,5 +640,5 @@ if __name__ == "__main__":
     #    sys.exit(1)
 
         
-    
+    {collec:[{'dts_id':'x', title:chosen_title, csv_name:bb}]}
     

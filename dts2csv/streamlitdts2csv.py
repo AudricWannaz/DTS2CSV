@@ -120,11 +120,24 @@ def form_screen_one(out_name):
         # end of form
         submitted = st.form_submit_button('MAKE CSV')
     if submitted:
-        out = [ROOT_COLLECTION_ID, MAX_DEPTH, RETRIEVE_FILES, TRANSFORM_TEI_TO_TXT, TRANSFORM_TEI_TO_HTML,
-                INLINE_TXT_IN_CSV]
+        out = {'ROOT_COLLECTION_ID':ROOT_COLLECTION_ID,
+               'MAX_DEPTH':MAX_DEPTH,
+               'RETRIEVE_FILES':RETRIEVE_FILES,
+              'TRANSFORM_TEI_TO_TXT':TRANSFORM_TEI_TO_TXT,
+              'TRANSFORM_TEI_TO_HTML':TRANSFORM_TEI_TO_HTML,
+               'INLINE_TXT_IN_CSV':INLINE_TXT_IN_CSV}
         st.write(out)
+        import json
+
+
+
+
     if out:
-        download_csv = st.download_button('DOWNLOAD', str(out), file_name=out_name + '.txt', mime=None, key=None, help=None,
+        #if st.button('Save JSON'):
+         #   json.dump(out, open("filepath", 'w'))
+
+        json_out = json.dumps(out)
+        download_csv = st.download_button('DOWNLOAD', json_out, file_name=out_name + '.json', mime=None, key=None, help=None,
                             on_click=st.balloons, args=None, kwargs=None)
         # problem, right now, click on download_out creates a jump back
         #if download_csv: revoir ca
