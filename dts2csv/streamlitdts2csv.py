@@ -63,17 +63,62 @@ def check_url(): #if no url in session states, launches start screen, else passe
 
         # other errors to handle? like 404?
 
+
+def add_coll_or_res(depart_list):
+    out = depart_list
+    with st.form('collres_form'):
+        out_key = st.text_input('enter new key')
+        out_value = st.text_input('enter new value')
+        submitted_2 = st.form_submit_button('submit')
+        if submitted_2:
+            st.write(depart_list.append({out_key:out_value}))
+            out.append({out_key:out_value})
+            st.write(out)
+            st.stop()
+
+def empty_list_in_fulle_list_out(a_list):
+    done = False
+    if 'count' not in st.session_state:
+        st.session_state.count = []
+
+    add_one = st.button('click to add one', key=0)
+    if add_one:
+        st.write(st.session_state.count)
+        add_coll_or_res(['test',4])
+        st.stop()
+        #st.session_state.count = add_coll_or_res(st.session_state.count)
+        #st.write(st.session_state.count)
+    st.write(f'the value is currently {st.session_state.count}', key=1)
+    done = st.button('DONE')
+    if done:
+        st.balloons()
+    st.stop()
+
+
 #this is the screen where 
 def screen_two(out_screen_one):
     collections = []
     resources = []
-    new_dic = {'COLLECTIONS':collections, 'RESOURCES':resources}
-    out_screen_one.update(out_screen_one) 
-    return out_screen_one
+
+
+
+    tryit = add_coll_or_res()
+    st.write(tryit)
+    ready = st.button('col ready?')
+
+    if not ready:
+        st.stop()
+    else:
+        new_dic = {'COLLECTIONS':collections, 'RESOURCES':resources}
+        new_dic2 = {'COLLECTIONS':collections}
+        out_screen_one.update(new_dic2)
+        return out_screen_one
 
 
 
 def main():
+    empty = []
+    empty_list_in_fulle_list_out(empty)
     dummy_dic = {'test':'yeah', 'really':'good'}
     st.write(dummy_dic)
     st.write('*')
