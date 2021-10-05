@@ -63,8 +63,23 @@ def check_url(): #if no url in session states, launches start screen, else passe
 
         # other errors to handle? like 404?
 
+#this is the screen where 
+def screen_two(out_screen_one):
+    collections = []
+    resources = []
+    new_dic = {'COLLECTIONS':collections, 'RESOURCES':resources}
+    out_screen_one.update(out_screen_one) 
+    return out_screen_one
+
+
 
 def main():
+    dummy_dic = {'test':'yeah', 'really':'good'}
+    st.write(dummy_dic)
+    st.write('*')
+    out2 = screen_two(dummy_dic)
+    st.write(out2)
+    st.stop()
     #see_saved_urls()
     #st.write('test3')
     opening_style()
@@ -120,7 +135,8 @@ def form_screen_one(out_name):
         # end of form
         submitted = st.form_submit_button('MAKE CSV')
     if submitted:
-        out = {'ROOT_COLLECTION_ID':ROOT_COLLECTION_ID,
+        out = {'DTS_URL':st.session_state.url,
+                'ROOT_COLLECTION_ID':ROOT_COLLECTION_ID,
                'MAX_DEPTH':MAX_DEPTH,
                'RETRIEVE_FILES':RETRIEVE_FILES,
               'TRANSFORM_TEI_TO_TXT':TRANSFORM_TEI_TO_TXT,

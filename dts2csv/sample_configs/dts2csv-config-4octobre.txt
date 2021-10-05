@@ -1,0 +1,12 @@
+
+1>DTS_URL=https://dts.perseids.org/
+2>START_COLLECTION_ID=urn:perseids:latinLit
+3>MAX_DEPTH=None
+4>RETRIEVE_FILES=True
+5>TRANSFORM_TEI_TO_TXT=True
+6>TRANSFORM_TEI_TO_HTML=False
+7>INLINE_TXT_IN_CSV=True
+8>COLLECTIONS = {}
+9>totalItems = nbChildren ???
+10>RESOURCES = {}
+
