@@ -2,7 +2,115 @@
 
 #imports
 import streamlit as st
+
+# not used?
 from os.path import expanduser
+
+#&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+#def init_sidebar():
+#    # initialises home and outputs
+#    if 'step' not in st.session_state:
+#        st.session_state.step = 1
+#    if 'gui_output' not in st.session_state:
+#        st.session_state.gui_output = []
+#    if 'collections' not in st.session_state:
+#        st.session_state.collections = []
+#    if 'ressources' not in st.session_state:
+#        st.session_state.ressources = []
+#
+#    sb_mode = st.sidebar.selectbox('Navigate by clicking', ['home', 'collections', 'ressources'])
+#    st.session_state.mode = sb_mode
+#
+#    st.sidebar.write('*')
+#    st.sidebar.write('collections')
+#    st.sidebar.write(st.session_state.collections)
+#    st.sidebar.write('ressources')
+#    st.sidebar.write(st.session_state.ressources)
+#
+#
+#def home():
+#    st.title('fix col - a part of the dts2csv hack')
+#
+#
+#def collections():
+#    st.title('collections here')
+#    mk_list('collections')
+#
+#
+#def ressources():
+#    st.title('ressources here')
+#    mk_list('ressources')
+#
+#
+#def main():
+#    init_sidebar()
+#    if st.session_state.mode == 'home':
+#        home()
+#    elif st.session_state.mode == 'collections':
+#        collections()
+#    elif st.session_state.mode == 'ressources':
+#        ressources()
+#
+#
+## in: an empty list
+#if 'col_list' not in st.session_state:
+#    st.session_state.col_list = []
+#
+#
+## out: a list of dicts with 2 els always named 'dbs_id' and 'csv_name'
+#
+#
+## A option serait de:
+## 1 demander le nb de dicts
+## 2 looper pour le nombre précis et collecter le idn et le csvn
+#
+#
+#def mk_list(name):
+#    st.title(f'Describe the {name}')
+#
+#    dicts_num = st.slider('How many parameters do you need?', 0, 20, 1)
+#
+#    with st.form('mk_list'):
+#        for i in range(dicts_num):
+#            st.write('Enter')
+#            a = st.text_input('dbs_id?', key=i)
+#            b = st.text_input('csv_name?', key=i)
+#            st.session_state[f'test{i}'] = {'dbs_id': a, 'csv_name': b}
+#        submit = st.form_submit_button('submit')
+#        if submit:
+#            st.balloons()
+#            # st.session_state.col_list = ['list_of_widgets']
+#            st.session_state[f'{name}'] = [st.session_state[f'test{i}'] for i in range(dicts_num)]
+#            st.write('*')
+#            st.write('collections')
+#            st.write(st.session_state.collections)
+#            st.write('ressources')
+#            st.write(st.session_state.ressources)
+#
+#
+## B encore mieux serait:
+## 0 bouton go soumet la liste telle quelle
+## 1 bouton xn genere un dict
+## >2 form yn demande idn et wdn du bouton xn
+#
+#if __name__ == '__main__':
+#    main()
+#
+#&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+
+#initialises steps
+#if 'step' not in st.session_state:
+#    st.session_state.step = 1
+#
+#def step_redirector():
+#    if  st.session_state.step == 1:
+#        check_url()
+#    elif st.session_state.step == 2:
+#        screen_one()
+#    elif st.session_state.step == 3:
+#        mk_list('collections')
+#
 
 #st.write('test1')
 
@@ -114,23 +222,39 @@ def screen_two(out_screen_one):
         out_screen_one.update(new_dic2)
         return out_screen_one
 
-
+def fake_home():
+    st.title('FAKE HOME')
+    if st.button('describe collection'):
+        mk_list('collection')
+    if st.button('describe utils'):
+        mk_list('utils')
 
 def main():
-    empty = []
-    empty_list_in_fulle_list_out(empty)
-    dummy_dic = {'test':'yeah', 'really':'good'}
-    st.write(dummy_dic)
-    st.write('*')
-    out2 = screen_two(dummy_dic)
-    st.write(out2)
-    st.stop()
+
+    #fake_home()
+    #mk_list('collection')
+    #mk_list('utils')
+    #st.write(st.session_state.collection)
+    #st.write(st.session_state.utils)
+
+    #st.stop()
+    #empty = []
+    #empty_list_in_fulle_list_out(empty)
+    #dummy_dic = {'test':'yeah', 'really':'good'}
+    #st.write(dummy_dic)
+    #st.write('*')
+    #out2 = screen_two(dummy_dic)
+    #st.write(out2)
+    #st.stop()
     #see_saved_urls()
     #st.write('test3')
     opening_style()
     #st.write('test4')
     check_url()
+    st.session_state.state == 2
     screen_one()
+    st.session_state.state == 3
+    mk_list('collection')
     closing_style()
 
 def screen1_vars():
@@ -139,8 +263,28 @@ def screen1_vars():
     TEI_XSL_STYLESHEETS_PATH = home + "/dev/tei/install/tei-xsl"
 
 
+def mk_list(name):
+    st.title(f'Describe the {name}')
+    if name not in st.session_state:
+        st.session_state[f'{name}'] = []
+    dicts_num = st.slider('How many parameters do you need?', 0, 20, 1)
+
+    with st.form('mk_list'):
+        for i in range(dicts_num):
+            st.write('Enter')
+            a = st.text_input('dbs_id?', key=i)
+            b = st.text_input('csv_name?', key=i)
+            st.session_state[f'test{i}'] = {'dbs_id': a, 'csv_name': b}
+        submit = st.form_submit_button('submit')
+        if submit:
+            st.balloons()
+            # st.session_state.col_list = ['list_of_widgets']
+            st.session_state[f'{name}'] = [st.session_state[f'test{i}'] for i in range(dicts_num)]
+
+
 def form_screen_one(out_name):
     out = False
+    st.header('step 2/3')
     with st.form('main_form'):
         st.header('1. Mandatory inputs')
         # where to start from
@@ -178,8 +322,9 @@ def form_screen_one(out_name):
                 INLINE_TXT_IN_CSV = False
 
         # end of form
-        submitted = st.form_submit_button('MAKE CSV')
+        submitted = st.form_submit_button('GO TO STEP 3')
     if submitted:
+        #mk_list('collection')
         out = {'DTS_URL':st.session_state.url,
                 'ROOT_COLLECTION_ID':ROOT_COLLECTION_ID,
                'MAX_DEPTH':MAX_DEPTH,
@@ -187,6 +332,8 @@ def form_screen_one(out_name):
               'TRANSFORM_TEI_TO_TXT':TRANSFORM_TEI_TO_TXT,
               'TRANSFORM_TEI_TO_HTML':TRANSFORM_TEI_TO_HTML,
                'INLINE_TXT_IN_CSV':INLINE_TXT_IN_CSV}
+        st.session_state['2of3'] = out #this is a dictionary
+
         st.write(out)
         import json
 
@@ -247,9 +394,10 @@ def screen_one():
         main()
 
 def get_url_input():
+    st.header('step 1/3')
     with st.form('url_form'):
         url_input = st.text_input('To start, enter an url: ') #rootUrl
-        submit_url = st.form_submit_button('GO')
+        submit_url = st.form_submit_button('GO TO STEP 2')
         if submit_url:
             st.session_state.url = url_input
     with st.expander('Use stored URLs instead'):
@@ -259,7 +407,7 @@ def get_url_input():
             #just to try out
             urls = ['https://streamlit.io/', 'https://scaife.perseus.org/library/'] # instead, have a line of code gather all the urls in the dedicated folder
             url_input2 = st.selectbox('Pick one', dts_urls)
-            submit_url2 = st.form_submit_button('GO')
+            submit_url2 = st.form_submit_button('GO TO STEP 2')
             if submit_url2:
                 st.session_state.url = url_input2
     with st.expander('Help'):
