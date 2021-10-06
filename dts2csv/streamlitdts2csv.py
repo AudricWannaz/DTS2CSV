@@ -2,14 +2,12 @@
 
 #MAIN QUESTIONS:
 # * is there merit to keep track of both step and mode, or should only mode be used?
-#
-#
+# * reset button everywhere
+# * json viewer next to 3 and 4 not only 2
 
 #imports
 import streamlit as st
 import os
-
-# not used?
 from os.path import expanduser
 
 
@@ -20,8 +18,9 @@ def home():
         submit_url = st.form_submit_button('II. Parameters')
         if submit_url:
             st.session_state.url = url_input
-            st.session_state.step += 1
-            step_redirector()
+            st.session_state.mode = 'II. Parameters'
+         
+
     with st.expander('Use stored URLs instead'):
         with st.form('url_form2'):
             # * should expand this list
@@ -32,22 +31,21 @@ def home():
             submit_url2 = st.form_submit_button('II. Parameters')
             if submit_url2:
                 st.session_state.url = url_input2
-                st.session_state.step += 1
-                step_redirector()
+                st.session_state.mode = 'II. Parameters'
+    
 
 
     with st.expander('Help'):
-        '*insert small video demo hosted on YT?*'
-        'mention streamlit options on the upper right'
+        st.write('Unsure how to use this webapp? Click on VI. Settings/Help in the sidebar to your left')
     with st.expander('Settings'):
         st.write('manage url list, ...')
 
 
 def init_session_state():
-    if 'step' not in st.session_state:
-        st.session_state.step = 1
+    if 'mode' not in st.session_state:
+        st.session_state.mode = 'I. URL'
     if 'url' not in st.session_state:
-        st.session_state.url = []
+        st.session_state.url = ''
     if 'step2_output' not in st.session_state:
         st.session_state.step2_output = []
     if 'collections' not in st.session_state:
@@ -78,7 +76,7 @@ def set_vars(): # we can use this function to declare variables that we ont chan
 
 def sidebar():
 
-    sb_mode = st.sidebar.selectbox('Navigate by clicking', ['I. URL', 'II. Parameters', 'III.Collections', 'IV.Ressources', 'Settings/Help'])
+    sb_mode = st.sidebar.selectbox('Navigate by clicking', ['I. URL', 'II. Parameters', 'III.Collections', 'IV.Ressources', 'V. Download CSV', 'VI. Settings/Help'])
     st.session_state.mode = sb_mode
 
     st.sidebar.write('*')
@@ -93,19 +91,34 @@ def sidebar():
     st.sidebar.write('ressources')
     st.sidebar.write(st.session_state.ressources)
     st.sidebar.write('Progress:')
-    if st.session_state.step == 1:
-        st.sidebar.progress(5)
-    elif st.session_state.step == 2:
-        st.sidebar.progress(30)
-    elif st.session_state.step == 3:
-        st.sidebar.progress(55)
-    elif st.session_state.step == 4:
-        st.sidebar.progress(85)
+    if st.session_state.mode == 'I. URL':
+        st.sidebar.progress(20)
+    elif st.session_state.mode == 'II. Parameters':
+        st.sidebar.progress(40)
+    elif st.session_state.mode == 'III.Collections':
+        st.sidebar.progress(60)
+    elif st.session_state.mode == 'IV.Ressources':
+        st.sidebar.progress(80)
+    elif st.session_state.mode == 'V. Download CSV':
+        st.sidebar.progress(100)
 
 
+stuff = [[1,2,3],[3,2,3]]
 def params():
-    st.write('params, formerly screen one')
-    screen_one()
+    col_1, col_2 = st.columns(2)
+    with col_1:
+        screen_one()
+    #col_2.write(stuff)
+    with col_2:
+        st.write('Here comes The JSON to view')
+        #st.write(stuff)
+        json_viewer(stuff)
+
+
+
+def json_viewer(a_json):
+    st.write(a_json)
+
 
 def mk_list(name):
     st.title(f'Describe the {name}')
@@ -129,7 +142,27 @@ def mk_list(name):
             st.write(st.session_state.ressources)
 
 def extras():
-    st.write('extras')
+    st.title('SETTINGS')
+
+    with st.expander('Streamlit Settings'):
+        st.write('This app is powered by Streamlit. This means you can access native Streamlit visual settings by clicking the top right corner of your screen.')
+    with st.expander('Advanced Settings'):
+    #with st.expander('Manage stored URLS'):
+        st.write('porbably roadmap only')
+    with st.expander('Personalise Graphics'):
+        st.write('porbably roadmap only')
+        st.write('wow such empty')    
+
+    st.write('*')
+
+    st.title('HELP')
+    with st.expander('What is DTS?'):
+        st.write('DTS is')
+    with st.expander('Why should I convert DTS to CSV?'):
+        st.write('The CSV format...')
+    with st.expander('Can I use this tool from the terminal?'):
+        st.write('Yes! Go to ...')
+
 
 def closing_style():
     st.image('logo.png')
@@ -157,6 +190,20 @@ def about():
 #    st.write('home')
 
 def end_screen():
+    st.header('READY TO GENERATE THE CSV')
+
+
+    st.title('&#8595')
+    if st.button('DOWNLOAD CSV'):
+        st.write('boum')
+    st.title('&#8593')
+
+    with st.expander('more'):
+        if st.button('export json config file'):
+            st.write('little bam')
+
+    if st.button('RESET APP'):
+        st.write('bim')
     #download_csv_button
     #save_config
     #restart
@@ -181,34 +228,35 @@ def step_redirector():
         end_screen()
 
 
+def mode_director():
+    if st.session_state.mode == 'I. URL':
+        home()
+    elif st.session_state.mode == 'II. Parameters':
+        params()
+    elif st.session_state.mode == 'III.Collections':
+        mk_list('collections')
+    elif st.session_state.mode == 'IV.Ressources':
+        mk_list('ressources')
+    elif st.session_state.mode == 'V. Download CSV':
+        end_screen()
+    else:
+        extras()
+
+
+
 def main():
     opening_style()
     #set_vars()>instead only call in functions that need them
     init_session_state()
     sidebar()
-    if st.session_state.mode == 'I. URL':
-        if st.session_state.step == 1:
-            home()
-        else:
-            step_redirector()
-        st.session_state.step += 1
-        step_redirector()
-    elif st.session_state.mode == 'II. Parameters':
-        params()
-        st.session_state.step += 1
-        step_redirector()
-    elif st.session_state.mode == 'III.Collections':
-        mk_list('collections')
-        st.session_state.step += 1
-        step_redirector()
-    elif st.session_state.mode == 'IV.Ressources':
-        mk_list('ressources')
-        st.session_state.step += 1
-        step_redirector()
-    else:
-        extras()
+    
+    mode_director()
     closing_style()
 
+    
+
+
+#task: finish in one way the pipe home>params>mkcol>mkres>finish 
 
 #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
@@ -318,7 +366,8 @@ def form_screen_one(out_name):
 
             #save used url in the correct folder
     else:
-        st.stop()
+        #st.stop()
+        st.write('--------------------')
 
 def screen_one():
     set_vars()
