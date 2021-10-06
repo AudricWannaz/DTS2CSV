@@ -1,120 +1,61 @@
 # questions to Laurent are noted with *
 
+#MAIN QUESTIONS:
+# * is there merit to keep track of both step and mode, or should only mode be used?
+#
+#
+
 #imports
 import streamlit as st
+import os
 
 # not used?
 from os.path import expanduser
 
-#&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-#def init_sidebar():
-#    # initialises home and outputs
-#    if 'step' not in st.session_state:
-#        st.session_state.step = 1
-#    if 'gui_output' not in st.session_state:
-#        st.session_state.gui_output = []
-#    if 'collections' not in st.session_state:
-#        st.session_state.collections = []
-#    if 'ressources' not in st.session_state:
-#        st.session_state.ressources = []
-#
-#    sb_mode = st.sidebar.selectbox('Navigate by clicking', ['home', 'collections', 'ressources'])
-#    st.session_state.mode = sb_mode
-#
-#    st.sidebar.write('*')
-#    st.sidebar.write('collections')
-#    st.sidebar.write(st.session_state.collections)
-#    st.sidebar.write('ressources')
-#    st.sidebar.write(st.session_state.ressources)
-#
-#
-#def home():
-#    st.title('fix col - a part of the dts2csv hack')
-#
-#
-#def collections():
-#    st.title('collections here')
-#    mk_list('collections')
-#
-#
-#def ressources():
-#    st.title('ressources here')
-#    mk_list('ressources')
-#
-#
-#def main():
-#    init_sidebar()
-#    if st.session_state.mode == 'home':
-#        home()
-#    elif st.session_state.mode == 'collections':
-#        collections()
-#    elif st.session_state.mode == 'ressources':
-#        ressources()
-#
-#
-## in: an empty list
-#if 'col_list' not in st.session_state:
-#    st.session_state.col_list = []
-#
-#
-## out: a list of dicts with 2 els always named 'dbs_id' and 'csv_name'
-#
-#
-## A option serait de:
-## 1 demander le nb de dicts
-## 2 looper pour le nombre précis et collecter le idn et le csvn
-#
-#
-#def mk_list(name):
-#    st.title(f'Describe the {name}')
-#
-#    dicts_num = st.slider('How many parameters do you need?', 0, 20, 1)
-#
-#    with st.form('mk_list'):
-#        for i in range(dicts_num):
-#            st.write('Enter')
-#            a = st.text_input('dbs_id?', key=i)
-#            b = st.text_input('csv_name?', key=i)
-#            st.session_state[f'test{i}'] = {'dbs_id': a, 'csv_name': b}
-#        submit = st.form_submit_button('submit')
-#        if submit:
-#            st.balloons()
-#            # st.session_state.col_list = ['list_of_widgets']
-#            st.session_state[f'{name}'] = [st.session_state[f'test{i}'] for i in range(dicts_num)]
-#            st.write('*')
-#            st.write('collections')
-#            st.write(st.session_state.collections)
-#            st.write('ressources')
-#            st.write(st.session_state.ressources)
-#
-#
-## B encore mieux serait:
-## 0 bouton go soumet la liste telle quelle
-## 1 bouton xn genere un dict
-## >2 form yn demande idn et wdn du bouton xn
-#
-#if __name__ == '__main__':
-#    main()
-#
-#&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+def home():
+    st.header('I. URL')
+    with st.form('url_form'):
+        url_input = st.text_input('To start, enter an url: ') #rootUrl
+        submit_url = st.form_submit_button('II. Parameters')
+        if submit_url:
+            st.session_state.url = url_input
+            st.session_state.step += 1
+            step_redirector()
+    with st.expander('Use stored URLs instead'):
+        with st.form('url_form2'):
+            # * should expand this list
+            dts_urls = ['https://texts.alpheios.net/api/dts', 'https://dts.perseids.org/', 'https://betamasaheft.eu/api/dts', 'https://edh-www.adw.uni-heidelberg.de/api/dts/']
+            #just to try out
+            urls = ['https://streamlit.io/', 'https://scaife.perseus.org/library/'] # instead, have a line of code gather all the urls in the dedicated folder
+            url_input2 = st.selectbox('Pick one', dts_urls)
+            submit_url2 = st.form_submit_button('II. Parameters')
+            if submit_url2:
+                st.session_state.url = url_input2
+                st.session_state.step += 1
+                step_redirector()
 
 
-#initialises steps
-#if 'step' not in st.session_state:
-#    st.session_state.step = 1
-#
-#def step_redirector():
-#    if  st.session_state.step == 1:
-#        check_url()
-#    elif st.session_state.step == 2:
-#        screen_one()
-#    elif st.session_state.step == 3:
-#        mk_list('collections')
-#
+    with st.expander('Help'):
+        '*insert small video demo hosted on YT?*'
+        'mention streamlit options on the upper right'
+    with st.expander('Settings'):
+        st.write('manage url list, ...')
 
-#st.write('test1')
 
-# functions
+def init_session_state():
+    if 'step' not in st.session_state:
+        st.session_state.step = 1
+    if 'url' not in st.session_state:
+        st.session_state.url = []
+    if 'step2_output' not in st.session_state:
+        st.session_state.step2_output = []
+    if 'collections' not in st.session_state:
+        st.session_state.collections = []
+    if 'ressources' not in st.session_state:
+        st.session_state.ressources = []
+
+
 def opening_style():
     col1, col2 = st.columns(2)
     col1.title(' Welcome to DTS2CSV!')
@@ -122,6 +63,73 @@ def opening_style():
     col2.image('logo.png')
     st.header('convert any DTS data in a CSV within seconds')
     # *want more?
+
+def see_saved_urls(): # this function shall create a list of urls in folder and in cache/session_state? 
+    home = expanduser("~")
+    url_files = os.listdir(r"C:\Users\Audric\Documents\GitHub\DTS2CSV\dts2csv\saved_urls")
+    #st.write(url_files)
+    #!!! still some work to do here
+
+def set_vars(): # we can use this function to declare variables that we ont change in this script
+    home = expanduser("~")
+    SAXON_JAR_PATH=home+"/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar"
+    TEI_XSL_STYLESHEETS_PATH = home + "/dev/tei/install/tei-xsl"
+    #see_saved_urls()
+
+def sidebar():
+
+    sb_mode = st.sidebar.selectbox('Navigate by clicking', ['I. URL', 'II. Parameters', 'III.Collections', 'IV.Ressources', 'Settings/Help'])
+    st.session_state.mode = sb_mode
+
+    st.sidebar.write('*')
+    st.sidebar.write('Current mode:')
+    st.sidebar.write(st.session_state.mode)
+    st.sidebar.write('url')
+    st.sidebar.write(st.session_state.url)
+    st.sidebar.write('step2_output')
+    st.sidebar.write(st.session_state.step2_output)
+    st.sidebar.write('collections')
+    st.sidebar.write(st.session_state.collections)
+    st.sidebar.write('ressources')
+    st.sidebar.write(st.session_state.ressources)
+    st.sidebar.write('Progress:')
+    if st.session_state.step == 1:
+        st.sidebar.progress(5)
+    elif st.session_state.step == 2:
+        st.sidebar.progress(30)
+    elif st.session_state.step == 3:
+        st.sidebar.progress(55)
+    elif st.session_state.step == 4:
+        st.sidebar.progress(85)
+
+
+def params():
+    st.write('params, formerly screen one')
+    screen_one()
+
+def mk_list(name):
+    st.title(f'Describe the {name}')
+
+    dicts_num = st.slider('How many parameters do you need?', 0, 20, 1)
+
+    with st.form('mk_list'):
+        for i in range(dicts_num):
+            st.write('Enter')
+            a = st.text_input('dbs_id?', key=i)
+            b = st.text_input('csv_name?', key=i)
+            st.session_state[f'test{i}'] = {'dbs_id': a, 'csv_name': b}
+        submit = st.form_submit_button('submit')
+        if submit:
+            st.balloons()
+            st.session_state[f'{name}'] = [st.session_state[f'test{i}'] for i in range(dicts_num)]
+            st.write('*')
+            st.write('collections')
+            st.write(st.session_state.collections)
+            st.write('ressources')
+            st.write(st.session_state.ressources)
+
+def extras():
+    st.write('extras')
 
 def closing_style():
     st.image('logo.png')
@@ -144,6 +152,67 @@ def about():
      
     See full version of LICENSE in <https://fsf.org/>'''
     st.write(infos)
+
+#def home():
+#    st.write('home')
+
+def end_screen():
+    #download_csv_button
+    #save_config
+    #restart
+    st.write('last screen')
+
+
+# after app works we can add if session_state.step != x then print warning or stuff
+def step_redirector():
+    if  st.session_state.step == 1:
+        st.session_state.mode = 'I. URL'
+        home()
+    elif st.session_state.step == 2:
+        st.session_state.mode = 'II. Parameters'
+        params()
+    elif st.session_state.step == 3:
+        st.session_state.mode = 'III.Collections'
+        mk_list('collections')
+    elif st.session_state.step == 4:
+        st.session_state.mode = 'IV.Ressources'
+        mk_list('ressources')
+    elif st.session_state.step == 5:
+        end_screen()
+
+
+def main():
+    opening_style()
+    #set_vars()>instead only call in functions that need them
+    init_session_state()
+    sidebar()
+    if st.session_state.mode == 'I. URL':
+        if st.session_state.step == 1:
+            home()
+        else:
+            step_redirector()
+        st.session_state.step += 1
+        step_redirector()
+    elif st.session_state.mode == 'II. Parameters':
+        params()
+        st.session_state.step += 1
+        step_redirector()
+    elif st.session_state.mode == 'III.Collections':
+        mk_list('collections')
+        st.session_state.step += 1
+        step_redirector()
+    elif st.session_state.mode == 'IV.Ressources':
+        mk_list('ressources')
+        st.session_state.step += 1
+        step_redirector()
+    else:
+        extras()
+    closing_style()
+
+
+#&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+
 
 def check_url(): #if no url in session states, launches start screen, else passes
     if 'url' not in st.session_state:
@@ -171,120 +240,17 @@ def check_url(): #if no url in session states, launches start screen, else passe
 
         # other errors to handle? like 404?
 
+#this is old main
 
-def add_coll_or_res(depart_list):
-    out = depart_list
-    with st.form('collres_form'):
-        out_key = st.text_input('enter new key')
-        out_value = st.text_input('enter new value')
-        submitted_2 = st.form_submit_button('submit')
-        if submitted_2:
-            st.write(depart_list.append({out_key:out_value}))
-            out.append({out_key:out_value})
-            st.write(out)
-            st.stop()
-
-def empty_list_in_fulle_list_out(a_list):
-    done = False
-    if 'count' not in st.session_state:
-        st.session_state.count = []
-
-    add_one = st.button('click to add one', key=0)
-    if add_one:
-        st.write(st.session_state.count)
-        add_coll_or_res(['test',4])
-        st.stop()
-        #st.session_state.count = add_coll_or_res(st.session_state.count)
-        #st.write(st.session_state.count)
-    st.write(f'the value is currently {st.session_state.count}', key=1)
-    done = st.button('DONE')
-    if done:
-        st.balloons()
-    st.stop()
-
-
-#this is the screen where 
-def screen_two(out_screen_one):
-    collections = []
-    resources = []
-
-
-
-    tryit = add_coll_or_res()
-    st.write(tryit)
-    ready = st.button('col ready?')
-
-    if not ready:
-        st.stop()
-    else:
-        new_dic = {'COLLECTIONS':collections, 'RESOURCES':resources}
-        new_dic2 = {'COLLECTIONS':collections}
-        out_screen_one.update(new_dic2)
-        return out_screen_one
-
-def fake_home():
-    st.title('FAKE HOME')
-    if st.button('describe collection'):
-        mk_list('collection')
-    if st.button('describe utils'):
-        mk_list('utils')
-
-def main():
-
-    #fake_home()
+    #check_url()
+    #st.session_state.state == 2
+    #screen_one()
+    #st.session_state.state == 3
     #mk_list('collection')
-    #mk_list('utils')
-    #st.write(st.session_state.collection)
-    #st.write(st.session_state.utils)
-
-    #st.stop()
-    #empty = []
-    #empty_list_in_fulle_list_out(empty)
-    #dummy_dic = {'test':'yeah', 'really':'good'}
-    #st.write(dummy_dic)
-    #st.write('*')
-    #out2 = screen_two(dummy_dic)
-    #st.write(out2)
-    #st.stop()
-    #see_saved_urls()
-    #st.write('test3')
-    opening_style()
-    #st.write('test4')
-    check_url()
-    st.session_state.state == 2
-    screen_one()
-    st.session_state.state == 3
-    mk_list('collection')
-    closing_style()
-
-def screen1_vars():
-    home = expanduser("~")
-    SAXON_JAR_PATH=home+"/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar"
-    TEI_XSL_STYLESHEETS_PATH = home + "/dev/tei/install/tei-xsl"
-
-
-def mk_list(name):
-    st.title(f'Describe the {name}')
-    if name not in st.session_state:
-        st.session_state[f'{name}'] = []
-    dicts_num = st.slider('How many parameters do you need?', 0, 20, 1)
-
-    with st.form('mk_list'):
-        for i in range(dicts_num):
-            st.write('Enter')
-            a = st.text_input('dbs_id?', key=i)
-            b = st.text_input('csv_name?', key=i)
-            st.session_state[f'test{i}'] = {'dbs_id': a, 'csv_name': b}
-        submit = st.form_submit_button('submit')
-        if submit:
-            st.balloons()
-            # st.session_state.col_list = ['list_of_widgets']
-            st.session_state[f'{name}'] = [st.session_state[f'test{i}'] for i in range(dicts_num)]
 
 
 def form_screen_one(out_name):
     out = False
-    st.header('step 2/3')
     with st.form('main_form'):
         st.header('1. Mandatory inputs')
         # where to start from
@@ -354,17 +320,8 @@ def form_screen_one(out_name):
     else:
         st.stop()
 
-def see_saved_urls():
-    home = expanduser("~")
-    import os
-    url_files = os.listdir(r"C:\Users\Audric\Documents\GitHub\DTS2CSV\dts2csv\saved_urls")
-    st.write(url_files)
-
-
 def screen_one():
-    screen1_vars()
-    #st.write('test5')
-    #SB of screen1
+    set_vars()
     rootUrl = st.session_state.url
     # * make default def_col, def_doc and if changed provide button to change it
     with st.sidebar.expander('+'):
@@ -393,42 +350,15 @@ def screen_one():
         #del st.session_state['url']
         main()
 
-def get_url_input():
-    st.header('step 1/3')
-    with st.form('url_form'):
-        url_input = st.text_input('To start, enter an url: ') #rootUrl
-        submit_url = st.form_submit_button('GO TO STEP 2')
-        if submit_url:
-            st.session_state.url = url_input
-    with st.expander('Use stored URLs instead'):
-        with st.form('url_form2'):
-            #should expand this list
-            dts_urls = ['https://texts.alpheios.net/api/dts', 'https://dts.perseids.org/', 'https://betamasaheft.eu/api/dts', 'https://edh-www.adw.uni-heidelberg.de/api/dts/']
-            #just to try out
-            urls = ['https://streamlit.io/', 'https://scaife.perseus.org/library/'] # instead, have a line of code gather all the urls in the dedicated folder
-            url_input2 = st.selectbox('Pick one', dts_urls)
-            submit_url2 = st.form_submit_button('GO TO STEP 2')
-            if submit_url2:
-                st.session_state.url = url_input2
-    with st.expander('Help'):
-        '*insert small video demo hosted on YT?*'
-        'mention streamlit options on the upper right'
-    with st.expander('Settings'):
-        st.write('manage url list, ...')
 
 
-# main code
-#st.write('test2')
 if __name__ == '__main__':
     main()
 
 #////////////////////////////////////////
-# END OF CLEAN CODE
-st.stop()
-#currently up to test5
-#only at the end of session remove all tests write
+# lets see if needed: > bon garde-fou
 
-#////////////////////////////////
+
 def use_later_maybe():
     mode = st.sidebar.selectbox('choose a mode:', ['DTS2CSV', 'DTS2PDF', 'Load input file', 'Manual input (main mode)','Settings'])
 
@@ -479,8 +409,4 @@ def use_later_maybe():
 
         }
     }
-
-# une fois fni premier clean aller regarder code non github et comms
-
-### !!! collaboration to plug in the vue js
 
