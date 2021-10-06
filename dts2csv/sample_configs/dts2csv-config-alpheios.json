@@ -12,12 +12,11 @@
     "TRANSFORM_TEI_TO_HTML":"False",
     "INLINE_TXT_IN_CSV":"True",
     "COLLECTIONS": [
-        {"dts_id":"totalItems","csv_name":"nbChildren", "mandatory":"True"},
         {"dts_id":"title"}        
     ],
     "RESOURCES": [
         {"dts_id":"dts:extensions/ns1:language","csv_name":"language"},
-        {"dts_id":"ts:extensions/cts:description[0]/@value","csv_name":"description","mandatory":"True"}
+        {"dts_id":"dts:extensions/cts:description[0]/@value","csv_name":"description","mandatory":"True"}
     ]   
 
 }

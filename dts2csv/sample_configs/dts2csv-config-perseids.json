@@ -12,7 +12,6 @@
     "TRANSFORM_TEI_TO_HTML":"False",
     "INLINE_TXT_IN_CSV":"True",
     "COLLECTIONS": [
-        {"dts_id":"totalItems","csv_name":"nbChildren", "mandatory":"True"},
         {"dts_id":"title"}
     ],
     "RESOURCES": [
@@ -20,5 +19,4 @@
         {"dts_id":"title"},
         {"dts_id":"description"}
     ]   
-
 }

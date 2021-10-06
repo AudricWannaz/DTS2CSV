@@ -12,15 +12,15 @@
     "TRANSFORM_TEI_TO_HTML":"False",
     "INLINE_TXT_IN_CSV":"True",
     "COLLECTIONS": [
-        {"dts_id":"totalItems","csv_name":"nbChildren", "mandatory":"True"},
         {"dts_id":"title"},
-        {"dts_id":"dts:extensions/ns2:creator[0]/@value", "csv_name":"author"},
-        {"dts_id":"dts:extensions/ns2:date", "csv_name":"date"}
+        {"dts_id":"dts:extensions/ns1:creator[0]/@value", "csv_name":"author"},
+        {"dts_id":"dts:extensions/ns1:date", "csv_name":"year"},
+        {"dts_id":"dts:extensions/ns1:language", "csv_name":"language"}
     ],
     "RESOURCES": [
-        {"dts_id":"dts:dublincore/dc:language","csv_name":"language"},
+        {"dts_id":"dts:extensions/ns1:language", "csv_name":"language"},
         {"dts_id":"title","mandatory":"True"},
-        {"dts_id":"description","mandatory":"True"}
+        {"dts_id":"dts:extensions/cts:description[0]/value", "csv_name":"description"}
     ]   
 
 }

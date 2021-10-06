@@ -51,14 +51,34 @@ class RawFormatter(HelpFormatter):
         return "\n".join([textwrap.fill(line, width) for line in textwrap.indent(textwrap.dedent(text), indent).splitlines()])
 
 SAMPLE_CONFIG='''
-
-
+{
+    "SAXON_JAR_PATH":"HOME/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar",
+    "TEI_XSL_STYLESHEETS_PATH":"HOME/dev/tei/install/tei-xsl",
+    "DTS_URL":"https://dts.perseids.org/",
+    "DTS_COLLECTIONS_ENTRYPOINT":"collections",
+    "DTS_DOCUMENTS_ENTRYPOINT":"documents",
+    "START_COLLECTION_ID":"urn:perseids:latinLit",
+    "MAX_DEPTH":"None",
+    "RETRIEVE_FILES":"True",
+    "TRANSFORM_TEI_TO_TXT":"True",
+    "TRANSFORM_TEI_TO_HTML":"False",
+    "INLINE_TXT_IN_CSV":"True",
+    "COLLECTIONS": [
+        {"dts_id":"totalItems","csv_name":"nbChildren", "mandatory":"True"},
+        {"dts_id":"title"}
+    ],
+    "RESOURCES": [
+        {"dts_id":"dts:dublincore/dc:language","csv_name":"language"},
+        {"dts_id":"title"},
+        {"dts_id":"description"}
+    ]   
+}
 '''
 DESC_TXT='''Extract data from DTS API and generate CSV files. 
 If Saxon and proper Tei-Xsl files are provided, conversion from TEI files to Text and HTML is automated.
 When conversion from TEI to text is done, basic text statistics are computed and added to generated CSV files.
     
-Main input is a python config file defining expected info. Try '-sampleconf' option to display a sample.
+Main input is a json config file defining expected info. Try '-sampleconf' option to display a sample.
 '''
 
 TEI_DOWNLOAD_NBTRIES=3
@@ -66,11 +86,14 @@ TEI_DOWNLOAD_NBTRIES=3
 retrievedDtsCollections=[]
 retrievedDtsResources=[]
 
-def removeSemicolumns(text):
+def normalizeUrn(text):
     return str(text).replace(";",",").strip()
 
 def normalizeCsvContent(text):
     return str(text).replace("\n",MX_CSV_CR_MARKER).replace(";",MX_ESCAPED_SEPARATOR).strip()
+
+def normalizeIdString(text):
+    return str(text).replace("https://","").replace("/","-").replace("urn:","").replace(":",".").strip()
 
 # call Saxon and Tei-XSL stylesheets to convert TEI file in required format
 def convertTei(conf,teiFile,stylesheet,outputFile):    
@@ -176,7 +199,7 @@ def extractValueFromJson(jsonpath, jsondata, isMandatory):
     return curDtsVal
 
 # store contents of given DTS object and return list of subobjects to explore
-def extractDtsJsonContents(conf,sourceid,csvId,urn,jsondata,entrypoint,parentDtsObj,attrsList,depth):
+def extractDtsJsonContents(conf,csvId,urn,jsondata,entrypoint,parentDtsObj,attrsList,depth):
 
     global retrievedDtsCollections
     global retrievedDtsResources
@@ -185,12 +208,20 @@ def extractDtsJsonContents(conf,sourceid,csvId,urn,jsondata,entrypoint,parentDts
         print("ERROR: contents retrieved from urn '"+urn+"' do not contain '@type' field, skipping it")
         return []
 
+    sourceId=normalizeIdString(conf["DTS_URL"])
+    startUrn=normalizeUrn(conf["START_COLLECTION_ID"])
+    
     dtsObj={
-            "sourceid":sourceid,
             "dtstype":jsondata["@type"],
-            "entrypoint":removeSemicolumns(entrypoint),
-            "urn":removeSemicolumns(urn),
-            "id":csvId,      
+            "sourceid":sourceId,
+            "startUrn":startUrn,
+            "entrypoint":normalizeUrn(entrypoint),
+            "urn":normalizeUrn(urn),
+            "id":csvId,
+                  
+            "nbLines":0,
+            "nbWords":0,
+            "nbChars":0
         }
 
     if jsondata["@type"]=="Collection":
@@ -224,43 +255,39 @@ def extractDtsJsonContents(conf,sourceid,csvId,urn,jsondata,entrypoint,parentDts
         if not csvValue:
             continue
 
-        #if "transform" in dtsAttrDesc:
-            #strTransformPython="csvValue"
-            #for transformFunc in dtsAttrDesc["transform"]:
-            #    strTransformPython+="."+transformFunc
-            
-           # csvValue=dtsAttrDesc["transform"](csvValue)     
-
         dtsObj[csv_name]=normalizeCsvContent(str(csvValue))
     
     # store retrieved data in memory for later csv dump
     if dtsObj['dtstype']=="Collection":
+        dtsObj["nbResources"]=0
+        dtsObj["nbDirectResources"]=0
         retrievedDtsCollections+=[dtsObj]
+
     else:
+        # set default value to 1 to allow generic counting statistics computation in aggregateCollectionsStats function
+        dtsObj["nbResources"]=1
         retrievedDtsResources+=[dtsObj]
 
     # process children elements if any (and if MAX_DEPTH parameter allows it)
     if "member" in jsondata and (conf["MAX_DEPTH"]==None or depth<conf["MAX_DEPTH"]):
         for childDtsElementInfo in jsondata["member"]:
-            processDtsElement(conf,sourceid,childDtsElementInfo,entrypoint,dtsObj,attrsList,depth+1)
+            processDtsElement(conf,childDtsElementInfo,entrypoint,dtsObj,depth+1)
 
     return dtsObj
 
 
-# default implementation, can be overriden by function 'config_idDts2idCsv' in user config file
-def normalizeId(idDts):
-    return idDts.replace('urn:','').replace(':','.').replace('urn.','')
 
-
-def processCollectionDtsElement(conf,sourceid,elementInfo,entrypoint,parentDtsObj,attrsList,urn,csvId,depth=0):
+def processCollectionDtsElement(conf,elementInfo,entrypoint,parentDtsObj,urn,csvId,depth=0):
     jsondata=retrieveDtsJsonContents(entrypoint,urn)
     if jsondata!=None:
-        extractDtsJsonContents(conf,sourceid,csvId,urn,jsondata,entrypoint,parentDtsObj,attrsList,depth)
+        extractDtsJsonContents(conf,csvId,urn,jsondata,entrypoint,parentDtsObj,conf["COLLECTIONS"],depth)
     else:
-        extractDtsJsonContents(conf,sourceid,csvId,urn,elementInfo,entrypoint,parentDtsObj,attrsList,depth)
+        extractDtsJsonContents(conf,csvId,urn,elementInfo,entrypoint,parentDtsObj,conf["COLLECTIONS"],depth)
 
-def processResourceDtsElement(conf,sourceid,elementInfo,entrypoint,parentDtsObj,attrsList,urn,csvId,depth=0):
-    dtsObj=extractDtsJsonContents(conf,sourceid,csvId,urn,elementInfo,entrypoint,parentDtsObj,attrsList,depth)
+def processResourceDtsElement(conf,elementInfo,entrypoint,parentDtsObj,urn,csvId,depth=0):
+    
+    dtsObj=extractDtsJsonContents(conf,csvId,urn,elementInfo,entrypoint,parentDtsObj,conf["RESOURCES"],depth)
+
     if conf["RETRIEVE_FILES"]==True:
 
         # apply custom filter if defined
@@ -274,7 +301,7 @@ def processResourceDtsElement(conf,sourceid,elementInfo,entrypoint,parentDtsObj,
             sys.exit(1)
 
         os.makedirs(TARGET_PATH+os.sep+"files",exist_ok=True)
-        fileBaseName=TARGET_PATH+os.sep+"files"+os.sep+removeSemicolumns(csvId)
+        fileBaseName=TARGET_PATH+os.sep+"files"+os.sep+normalizeUrn(csvId)
         teiFileName=fileBaseName+".xml"
         
         print("downloading "+teiFileName)
@@ -300,29 +327,82 @@ def processResourceDtsElement(conf,sourceid,elementInfo,entrypoint,parentDtsObj,
             print("ERROR: message was: "+str(e))
             # continue anyway     
 
-def processDtsElement(conf,sourceid,elementInfo,entrypoint,parentDtsObj,attrsList,depth=0):
+def processDtsElement(conf,elementInfo,entrypoint,parentDtsObj,depth=0):
 
     urn = elementInfo["@id"]
-    csvId = normalizeId(elementInfo["@id"])
+    csvId = normalizeIdString(elementInfo["@id"])
 
     time.sleep(BREATH_TIME_SEC)
     
     if elementInfo["@type"]=="Collection":
-        processCollectionDtsElement(conf,sourceid,elementInfo,entrypoint,parentDtsObj,attrsList,urn,csvId,depth)
+        processCollectionDtsElement(conf,elementInfo,entrypoint,parentDtsObj,urn,csvId,depth)
         
     elif elementInfo["@type"]=="Resource":
-        processResourceDtsElement(conf,sourceid,elementInfo,entrypoint,parentDtsObj,attrsList,urn,csvId,depth)
+        processResourceDtsElement(conf,elementInfo,entrypoint,parentDtsObj,urn,csvId,depth)
         
     else:
         return
 
+
+# return tuple: nbLines, nbWords, nbChars, csvLine
+def computeTextSatistics(textFile,withInlineCsv):
+
+    stats={
+        'nbWords':0,
+        'nbLines':0,
+        'nbChars':0
+    }
+    # used when option for inline contents in CSV has been required by user
+    globalCsvLine=""
+
+    with open(textFile) as f:
+        for line in f:
+            stats['nbChars']+=len(line)
+            stats['nbWords']+=len(line.split())
+            stats['nbLines']+=1
+            if withInlineCsv==True:
+                globalCsvLine+=line.replace("\n",MX_CSV_CR_MARKER).replace(";",MX_ESCAPED_SEPARATOR)
+    
+    return stats,globalCsvLine
+    
+
+def aggregateCollectionsStats(conf,itemsList,retrievedCollections):
+
+    nextCollectionsList=[]
+    for itemData in itemsList:
+        parentCollectionData=itemData["parent"]
+        if parentCollectionData==None:
+            continue
+        
+        parentCollectionData["nbResources"]+=itemData["nbResources"]
+        
+        if itemData["dtstype"]=="Resource":
+            parentCollectionData["nbDirectResources"]+=1
+
+        # if TEI transformed to text, we compiled some stats that we will propagate through parent collections
+        if conf["TRANSFORM_TEI_TO_TXT"]:    
+            parentCollectionData["nbLines"]+=itemData["nbLines"]
+            parentCollectionData["nbWords"]+=itemData["nbWords"]
+            parentCollectionData["nbChars"]+=itemData["nbChars"]
+
+        nextCollectionsList+=[parentCollectionData]
+
+    # hopefully there is no cyclic dependencies
+    if len(nextCollectionsList)>0:
+        aggregateCollectionsStats(conf,nextCollectionsList,retrievedCollections)
+
+
 # build CSV Collections file
-def dumpCollectionsCsv(targetFileName,objsList,attrsList):
+def dumpCollectionsCsv(conf,targetFileName,objsList,attrsList):
     global retrievedDtsCollections
 
     targetfile= open(targetFileName, 'w')
 
-    headerLine="#id;dtstype;sourceId;entrypoint;urn;url;parent;members"    
+    headerLine="#id;dtstype;sourceId;entrypoint;urn;url;parent;members;nbMembers;nbResources;nbDirectResources"   
+
+    if conf["TRANSFORM_TEI_TO_TXT"]:
+         headerLine+=";nbLines;nbWords;nbChars"
+
     for attrDesc in attrsList:
         headerLine+=";"+attrDesc["csv_name"]
     targetfile.write(headerLine+"\n")
@@ -360,6 +440,20 @@ def dumpCollectionsCsv(targetFileName,objsList,attrsList):
             membersStrList+=memberObj["id"]
         curLine+=";"+membersStrList
         
+        # nbMembers
+        curLine+=";"+str(len(dtsParsedData["members"]))
+
+        # nbResources
+        curLine+=";"+str(dtsParsedData["nbResources"])
+
+        # nbContainedResources
+        curLine+=";"+str(dtsParsedData["nbDirectResources"])
+
+        if conf["TRANSFORM_TEI_TO_TXT"]:                       
+            curLine+=";"+str(dtsParsedData['nbLines'])
+            curLine+=";"+str(dtsParsedData['nbWords'])
+            curLine+=";"+str(dtsParsedData['nbChars'])
+
         # custom fields
         for attrDesc in attrsList:
             curLine+=";"
@@ -372,29 +466,8 @@ def dumpCollectionsCsv(targetFileName,objsList,attrsList):
     targetfile.close()
 
 
-# return tuple: nbLines, nbWords, nbChars, csvLine
-def computeTextSatistics(textFile,withInlineCsv):
-
-    stats={
-        'nbWords':0,
-        'nbLines':0,
-        'nbChars':0
-    }
-    # used when option for inline contents in CSV has been required by user
-    globalCsvLine=""
-
-    with open(textFile) as f:
-        for line in f:
-            stats['nbChars']+=len(line)
-            stats['nbWords']+=len(line.split())
-            stats['nbLines']+=1
-            if withInlineCsv==True:
-                globalCsvLine+=line.replace("\n",MX_CSV_CR_MARKER).replace(";",MX_ESCAPED_SEPARATOR)
-    
-    return stats,globalCsvLine
-    
-
 # build CSV Resources file
+# return statistics summary, by unique ID
 def dumpResourcesCsv(conf,targetFileName,objsList,attrsList):
     global retrievedDtsCollections
 
@@ -450,9 +523,12 @@ def dumpResourcesCsv(conf,targetFileName,objsList,attrsList):
                 curLine+=os.path.basename(dtsParsedData["textFile"])
             # text Stats
             textStats,inlineContentsAsCsv = computeTextSatistics(dtsParsedData["textFile"],withInlineCsv=conf["INLINE_TXT_IN_CSV"])
-            curLine+=";"+str(textStats['nbLines'])
-            curLine+=";"+str(textStats['nbWords'])
-            curLine+=";"+str(textStats['nbChars'])
+            dtsParsedData['nbLines']=textStats['nbLines']
+            dtsParsedData['nbWords']=textStats['nbWords']
+            dtsParsedData['nbChars']=textStats['nbChars']            
+            curLine+=";"+str(dtsParsedData['nbLines'])
+            curLine+=";"+str(dtsParsedData['nbWords'])
+            curLine+=";"+str(dtsParsedData['nbChars'])
 
         # html file name and path
         if conf["TRANSFORM_TEI_TO_HTML"]:
@@ -532,9 +608,31 @@ def checkConfConsistency(conf):
                                                         +str(conf["INLINE_TXT_IN_CSV"])+" in your config)")
         sys.exit(1)
 
-def normalizeIdString(str):
-    return str.replace("https://","").replace("/","").replace("urn:","").replace(":","-")
+def dts2csv(configfileJson):
 
+    if not os.path.isfile(configfileJson):
+        print("ERROR: given config file not reachable : '"+configfileJson+"'")
+        sys.exit(1)
+    conf=loadConfig(configfileJson)
+    checkConfConsistency(conf)
+
+    if not os.path.isfile(TARGET_PATH):
+        try:
+            os.makedirs(TARGET_PATH,exist_ok=True)
+        except Exception as e:
+            print("ERROR: unable to create target folder '"+str(TARGET_PATH)+"': "+str(e))
+            sys.exit(1)
+    
+    rootElementInfo={"@id":conf["START_COLLECTION_ID"], "@type":"Collection"}
+    collectionsEntryUrl=conf["DTS_URL"]+"/"+conf["DTS_COLLECTIONS_ENTRYPOINT"]
+    
+    processDtsElement(conf,rootElementInfo,collectionsEntryUrl,None)
+
+    dumpResourcesCsv(conf,TARGET_PATH+os.sep+"resources.csv",retrievedDtsResources,conf["RESOURCES"])
+    aggregateCollectionsStats(conf,retrievedDtsResources,retrievedDtsCollections)
+    dumpCollectionsCsv(conf,TARGET_PATH+os.sep+"collections.csv",retrievedDtsCollections,conf["COLLECTIONS"])    
+    print("Files generated in '"+TARGET_PATH+"', you can now import them into metaindex.fr if you wish! bye bye.")
+    
 if __name__ == "__main__":
 
     # Define and parse arguments.
@@ -552,33 +650,5 @@ if __name__ == "__main__":
         print("ERROR: missing input argument: configfile")
         sys.exit(1)
 
-    if not os.path.isfile(args.configfile):
-        print("ERROR: given config file not reachable : '"+args.configfile+"'")
-        sys.exit(1)
-    conf=loadConfig(args.configfile)
-    checkConfConsistency(conf)
-
-    if not os.path.isfile(TARGET_PATH):
-        try:
-            os.makedirs(TARGET_PATH,exist_ok=True)
-        except Exception as e:
-            print("ERROR: unable to create target folder '"+str(TARGET_PATH)+"': "+str(e))
-            sys.exit(1)
-
-    
-    datasetId=normalizeIdString(conf["DTS_URL"])+"_"+normalizeIdString(conf["START_COLLECTION_ID"])
-    rootElementInfo={"@id":conf["START_COLLECTION_ID"], "@type":"Collection"}
-    collectionsEntryUrl=conf["DTS_URL"]+"/"+conf["DTS_COLLECTIONS_ENTRYPOINT"]
-    processDtsElement(conf,datasetId,rootElementInfo,collectionsEntryUrl,None,conf["COLLECTIONS"])
-
-    dumpCollectionsCsv(TARGET_PATH+os.sep+"collections.csv",retrievedDtsCollections,conf["COLLECTIONS"])
-    dumpResourcesCsv(conf,TARGET_PATH+os.sep+"resources.csv",retrievedDtsResources,conf["RESOURCES"])
-    print("Files generated in '"+TARGET_PATH+"', you can now import them into metaindex.fr if you wish! bye bye.")
-    
-    #if os.path.isfolder(args.targetfolder):
-    #    print("ERROR: given target folder already exists, please remove it or use -f option : "+args.targetfolder)
-    #    sys.exit(1)
-
-        
-    #{collec:[{'dts_id':'x', title:chosen_title, csv_name:bb}]}
+    dts2csv(args.configfile)
     
