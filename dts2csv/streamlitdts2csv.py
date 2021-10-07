@@ -1,45 +1,65 @@
 # questions to Laurent are noted with *
 
 #MAIN QUESTIONS:
-# * is there merit to keep track of both step and mode, or should only mode be used?
-# * reset button everywhere
+
+# * reset button everywhere > probs yes
 # * json viewer next to 3 and 4 not only 2
+# * mention this app has been designed for light mode
+
+#main todo
+
+#clean sb
 
 #imports
 import streamlit as st
+import json
+import requests
 import os
 from os.path import expanduser
 
+#st.success('good')
+#st.warning('bad')
+#st.info('info')
+#st.error('very bad')
+
+def dummy():
+    st.write('bridge function')
 
 def home():
-    st.header('I. URL')
-    with st.form('url_form'):
-        url_input = st.text_input('To start, enter an url: ') #rootUrl
-        submit_url = st.form_submit_button('II. Parameters')
-        if submit_url:
-            st.session_state.url = url_input
-            st.session_state.mode = 'II. Parameters'
-         
+    st.header('A. URL')
+    cola, colb = st.columns(2)
+    with cola:
 
-    with st.expander('Use stored URLs instead'):
-        with st.form('url_form2'):
-            # * should expand this list
-            dts_urls = ['https://texts.alpheios.net/api/dts', 'https://dts.perseids.org/', 'https://betamasaheft.eu/api/dts', 'https://edh-www.adw.uni-heidelberg.de/api/dts/']
-            #just to try out
-            urls = ['https://streamlit.io/', 'https://scaife.perseus.org/library/'] # instead, have a line of code gather all the urls in the dedicated folder
-            url_input2 = st.selectbox('Pick one', dts_urls)
-            submit_url2 = st.form_submit_button('II. Parameters')
-            if submit_url2:
-                st.session_state.url = url_input2
-                st.session_state.mode = 'II. Parameters'
-    
+        with st.form('url_form'):
+            url_input = st.text_input('To start, enter an url: ') #rootUrl
+            submit_url = st.form_submit_button('SUBMIT URL')
+            if submit_url:
+                check_url()
+                st.session_state.url = url_input
+
+    with colb:
+        with st.expander('Use stored URLs instead'):
+            with st.form('url_form2'):
+                # * should expand this list
+                dts_urls = ['https://texts.alpheios.net/api/dts', 'https://dts.perseids.org/', 'https://betamasaheft.eu/api/dts', 'https://edh-www.adw.uni-heidelberg.de/api/dts/']
+                #just to try out
+                urls = ['https://streamlit.io/', 'https://scaife.perseus.org/library/'] # instead, have a line of code gather all the urls in the dedicated folder
+                url_input2 = st.selectbox('Pick one', dts_urls)
+                submit_url2 = st.form_submit_button('SUBMIT URL')
+                if submit_url2:
+                    check_url()
+                    st.session_state.url = url_input2
+
+
+    st.subheader('B. JSON CONFIG FILE (for advanced users)')
+    with st.expander('+'):
+        uploaded_file = st.file_uploader("Choose a file")
+        if uploaded_file is not None:
+            dummy()
 
 
     with st.expander('Help'):
         st.write('Unsure how to use this webapp? Click on VI. Settings/Help in the sidebar to your left')
-    with st.expander('Settings'):
-        st.write('manage url list, ...')
-
 
 def init_session_state():
     if 'mode' not in st.session_state:
@@ -52,7 +72,6 @@ def init_session_state():
         st.session_state.collections = []
     if 'ressources' not in st.session_state:
         st.session_state.ressources = []
-
 
 def opening_style():
     col1, col2 = st.columns(2)
@@ -80,17 +99,17 @@ def sidebar():
     st.session_state.mode = sb_mode
 
     st.sidebar.write('*')
-    st.sidebar.write('Current mode:')
-    st.sidebar.write(st.session_state.mode)
-    st.sidebar.write('url')
-    st.sidebar.write(st.session_state.url)
-    st.sidebar.write('step2_output')
-    st.sidebar.write(st.session_state.step2_output)
-    st.sidebar.write('collections')
-    st.sidebar.write(st.session_state.collections)
-    st.sidebar.write('ressources')
-    st.sidebar.write(st.session_state.ressources)
-    st.sidebar.write('Progress:')
+    with st.sidebar.expander(f'Session state upon entry (mode:{st.session_state.mode})'):
+
+        st.write('url')
+        st.write(st.session_state.url)
+        st.write('step2_output')
+        st.write(st.session_state.step2_output)
+        st.write('collections')
+        st.write(st.session_state.collections)
+        st.write('ressources')
+        st.write(st.session_state.ressources)
+        st.write('Progress:')
     if st.session_state.mode == 'I. URL':
         st.sidebar.progress(20)
     elif st.session_state.mode == 'II. Parameters':
@@ -102,17 +121,27 @@ def sidebar():
     elif st.session_state.mode == 'V. Download CSV':
         st.sidebar.progress(100)
 
+def url_sine_qua_non():
+    if st.session_state.url == '':
+        st.warning('You have not entered an URL yet. Please go to I. URL using the sidebar')
+        closing_style()
+        st.stop()
+    else:
+        pass
 
-stuff = [[1,2,3],[3,2,3]]
+stuff = [[1,2,3],[3,2,3]] #placeholder json
 def params():
+    url_sine_qua_non()
     col_1, col_2 = st.columns(2)
     with col_1:
         screen_one()
     #col_2.write(stuff)
     with col_2:
-        st.write('Here comes The JSON to view')
+        st.write('-----------------------------')
+        st.subheader('JSON VIEWER')
         #st.write(stuff)
         json_viewer(stuff)
+
 
 
 
@@ -121,6 +150,7 @@ def json_viewer(a_json):
 
 
 def mk_list(name):
+    url_sine_qua_non()
     st.title(f'Describe the {name}')
 
     dicts_num = st.slider('How many parameters do you need?', 0, 20, 1)
@@ -131,15 +161,12 @@ def mk_list(name):
             a = st.text_input('dbs_id?', key=i)
             b = st.text_input('csv_name?', key=i)
             st.session_state[f'test{i}'] = {'dbs_id': a, 'csv_name': b}
-        submit = st.form_submit_button('submit')
+        submit = st.form_submit_button(f'submit {name}')
         if submit:
-            st.balloons()
+
             st.session_state[f'{name}'] = [st.session_state[f'test{i}'] for i in range(dicts_num)]
-            st.write('*')
-            st.write('collections')
-            st.write(st.session_state.collections)
-            st.write('ressources')
-            st.write(st.session_state.ressources)
+            st.success(f'{name} updated')
+
 
 def extras():
     st.title('SETTINGS')
@@ -186,16 +213,15 @@ def about():
     See full version of LICENSE in <https://fsf.org/>'''
     st.write(infos)
 
-#def home():
-#    st.write('home')
-
 def end_screen():
     st.header('READY TO GENERATE THE CSV')
 
 
     st.title('&#8595')
     if st.button('DOWNLOAD CSV'):
+        # what is optional
         st.write('boum')
+
     st.title('&#8593')
 
     with st.expander('more'):
@@ -209,24 +235,7 @@ def end_screen():
     #restart
     st.write('last screen')
 
-
 # after app works we can add if session_state.step != x then print warning or stuff
-def step_redirector():
-    if  st.session_state.step == 1:
-        st.session_state.mode = 'I. URL'
-        home()
-    elif st.session_state.step == 2:
-        st.session_state.mode = 'II. Parameters'
-        params()
-    elif st.session_state.step == 3:
-        st.session_state.mode = 'III.Collections'
-        mk_list('collections')
-    elif st.session_state.step == 4:
-        st.session_state.mode = 'IV.Ressources'
-        mk_list('ressources')
-    elif st.session_state.step == 5:
-        end_screen()
-
 
 def mode_director():
     if st.session_state.mode == 'I. URL':
@@ -263,38 +272,20 @@ def main():
 
 
 def check_url(): #if no url in session states, launches start screen, else passes
-    if 'url' not in st.session_state:
-        get_url_input()
+    try:
+        response = requests.get(st.session_state.url)
+    except:
+        st.error('Not a valid URL. Please try again')
+        #closing_style()
         st.stop()
+
+    if response.status_code == 200:
+        st.success('This URL seems valid! You can now select how you want to build your CSV with the modes II-IV or'
+                   ' jump directly to the Download menu V')
     else:
-        import requests
-        try:
-            response = requests.get(st.session_state.url)
-        except:
-            st.error('Not a valid URL')
-            del st.session_state['url']
-            back = st.button('BACK')
-            if back:
-                main()
-            st.stop()
-        if response.status_code == 200:
-            st.success('This URL seems valid! You can now select how you want to build your CSV')
-        else:
-            st.error('Web site does not exist')
-            back = st.button('BACK')
-            if back:
-                main()
-            st.stop()
+        st.error('Web site does not exist')
 
         # other errors to handle? like 404?
-
-#this is old main
-
-    #check_url()
-    #st.session_state.state == 2
-    #screen_one()
-    #st.session_state.state == 3
-    #mk_list('collection')
 
 
 def form_screen_one(out_name):
@@ -336,7 +327,7 @@ def form_screen_one(out_name):
                 INLINE_TXT_IN_CSV = False
 
         # end of form
-        submitted = st.form_submit_button('GO TO STEP 3')
+        submitted = st.form_submit_button('III. Collections')
     if submitted:
         #mk_list('collection')
         out = {'DTS_URL':st.session_state.url,
@@ -346,28 +337,20 @@ def form_screen_one(out_name):
               'TRANSFORM_TEI_TO_TXT':TRANSFORM_TEI_TO_TXT,
               'TRANSFORM_TEI_TO_HTML':TRANSFORM_TEI_TO_HTML,
                'INLINE_TXT_IN_CSV':INLINE_TXT_IN_CSV}
-        st.session_state['2of3'] = out #this is a dictionary
+        st.session_state.step2_output = out #this is a dictionary
 
         st.write(out)
-        import json
 
 
 
 
-    if out:
-        #if st.button('Save JSON'):
-         #   json.dump(out, open("filepath", 'w'))
 
-        json_out = json.dumps(out)
-        download_csv = st.download_button('DOWNLOAD', json_out, file_name=out_name + '.json', mime=None, key=None, help=None,
-                            on_click=st.balloons, args=None, kwargs=None)
-        # problem, right now, click on download_out creates a jump back
+def sendJSON_button(pre_json):
+    json_out = json.dumps(pre_json)
+    download_csv = st.download_button('DOWNLOAD', json_out, file_name=out_name + '.json', mime=None, key=None, help=None,
+                        on_click=st.balloons, args=None, kwargs=None)
+# has to chaneg actually since we will only download csv
         #if download_csv: revoir ca
-
-            #save used url in the correct folder
-    else:
-        #st.stop()
-        st.write('--------------------')
 
 def screen_one():
     set_vars()
@@ -406,8 +389,6 @@ if __name__ == '__main__':
 
 #////////////////////////////////////////
 # lets see if needed: > bon garde-fou
-
-
 def use_later_maybe():
     mode = st.sidebar.selectbox('choose a mode:', ['DTS2CSV', 'DTS2PDF', 'Load input file', 'Manual input (main mode)','Settings'])
 
