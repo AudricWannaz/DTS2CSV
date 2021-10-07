@@ -82,7 +82,7 @@ def set_vars(): # we can use this function to declare variables that we ont chan
 
 def sidebar():
 
-    sb_mode = st.sidebar.selectbox('Navigate by clicking', ['I. URL', 'II. Parameters', 'III.Collections', 'IV.resources', 'V. Download CSV', 'VI. Settings/Help'])
+    sb_mode = st.sidebar.selectbox('Navigate by clicking', ['I.URL', 'II.Parameters', 'III.Collections', 'IV.Resources', 'V.Download CSV', 'VI.Settings/Help'])
     st.session_state.mode = sb_mode
 
     st.sidebar.write('*')
@@ -97,15 +97,15 @@ def sidebar():
         st.write('resources')
         st.write(st.session_state.resources)
     st.sidebar.write('Progress:')
-    if st.session_state.mode == 'I. URL':
+    if st.session_state.mode == 'I.URL':
         st.sidebar.progress(20)
-    elif st.session_state.mode == 'II. Parameters':
+    elif st.session_state.mode == 'II.Parameters':
         st.sidebar.progress(40)
     elif st.session_state.mode == 'III.Collections':
         st.sidebar.progress(60)
-    elif st.session_state.mode == 'IV.resources':
+    elif st.session_state.mode == 'IV.Resources':
         st.sidebar.progress(80)
-    elif st.session_state.mode == 'V. Download CSV':
+    elif st.session_state.mode == 'V.Download CSV':
         st.sidebar.progress(100)
 
 def url_sine_qua_non():
@@ -245,21 +245,18 @@ def end_screen():
 
     if st.button('RESET APP'):
         st.write('bim')
-    #download_csv_button
-    #save_config
-    #restart
-    st.write('last screen')
+    
 
 def mode_director():
-    if st.session_state.mode == 'I. URL':
+    if st.session_state.mode == 'I.URL':
         home()
-    elif st.session_state.mode == 'II. Parameters':
+    elif st.session_state.mode == 'II.Parameters':
         params()
     elif st.session_state.mode == 'III.Collections':
         mk_list('collections')
     elif st.session_state.mode == 'IV.Resources':
         mk_list('resources')
-    elif st.session_state.mode == 'V. Download CSV':
+    elif st.session_state.mode == 'V.Download CSV':
         end_screen()
     else:
         extras()
