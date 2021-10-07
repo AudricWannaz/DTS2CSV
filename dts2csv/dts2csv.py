@@ -639,6 +639,9 @@ def extract_all(conf):
     aggregateCollectionsStats(conf,retrievedDtsResources,retrievedDtsCollections)
     dumpCollectionsCsv(conf,TARGET_PATH+os.sep+"collections.csv",retrievedDtsCollections,conf["COLLECTIONS"])    
     
+
+    print("Finished extraction, files generated in '"+os.path.abspath(TARGET_PATH)+"', bye bye.")
+
     return TARGET_PATH
     
 if __name__ == "__main__":
@@ -666,5 +669,5 @@ if __name__ == "__main__":
     confJson=loadConfig(args.configfile)
     generatedFolder= extract_all(confJson)
 
-    print("Files generated in '"+generatedFolder+"', bye bye.")
+    sys.exit(0)
     
