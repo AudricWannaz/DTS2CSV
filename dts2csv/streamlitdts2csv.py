@@ -3,16 +3,25 @@
 #MAIN QUESTIONS:
 
 # * reset button everywhere > probs yes
-# * json viewer next to 3 and 4 not only 2
+# * json viewer next to 3 and 4 not only 2 > how to adapt json viewrr?
 # * mention this app has been designed for light mode
+# * does it work for macos and windows?
 
 #main todo
 
-#clean sb
+#regler probleme dans screen one
 
+# change of collections > stuff like that in advances parameters
+#delete collection/ressources button
+#clean sb
+# initialize json url
+#delete intry should work
+
+import dts2csv as d2c
 #imports
 import streamlit as st
 import json
+import urllib.request
 import requests
 import os
 from os.path import expanduser
@@ -26,7 +35,10 @@ def dummy():
     st.write('bridge function')
 
 def home():
-    st.header('A. URL')
+    st.header('A.')
+    with urllib.request.urlopen('https://texts.alpheios.net/api/dts') as url:
+            testez = json.loads(url.read().decode())
+    st.write(testez)
     cola, colb = st.columns(2)
     with cola:
 
@@ -34,7 +46,7 @@ def home():
             url_input = st.text_input('To start, enter an url: ') #rootUrl
             submit_url = st.form_submit_button('SUBMIT URL')
             if submit_url:
-                check_url()
+                check_url(url_input)
                 st.session_state.url = url_input
 
     with colb:
@@ -47,7 +59,7 @@ def home():
                 url_input2 = st.selectbox('Pick one', dts_urls)
                 submit_url2 = st.form_submit_button('SUBMIT URL')
                 if submit_url2:
-                    check_url()
+                    check_url(url_input2)
                     st.session_state.url = url_input2
 
 
@@ -88,9 +100,9 @@ def see_saved_urls(): # this function shall create a list of urls in folder and 
     #!!! still some work to do here
 
 def set_vars(): # we can use this function to declare variables that we ont change in this script
-    home = expanduser("~")
-    SAXON_JAR_PATH=home+"/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar"
-    TEI_XSL_STYLESHEETS_PATH = home + "/dev/tei/install/tei-xsl"
+    maison = expanduser("~")
+    SAXON_JAR_PATH=maison+"/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar"
+    TEI_XSL_STYLESHEETS_PATH = maison + "/dev/tei/install/tei-xsl"
     #see_saved_urls()
 
 def sidebar():
@@ -130,6 +142,32 @@ def url_sine_qua_non():
         pass
 
 stuff = [[1,2,3],[3,2,3]] #placeholder json
+
+
+stuff2 = {
+    "SAXON_JAR_PATH":"HOME/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar",
+    "TEI_XSL_STYLESHEETS_PATH":"HOME/dev/tei/install/tei-xsl",
+    "DTS_URL":"https://dts.perseids.org/",
+    "DTS_COLLECTIONS_ENTRYPOINT":"collections",
+    "DTS_DOCUMENTS_ENTRYPOINT":"documents",
+    "START_COLLECTION_ID":"urn:perseids:latinLit",
+    "MAX_DEPTH":"None",
+    "RETRIEVE_FILES":"True",
+    "TRANSFORM_TEI_TO_TXT":"True",
+    "TRANSFORM_TEI_TO_HTML":"False",
+    "INLINE_TXT_IN_CSV":"True",
+    "COLLECTIONS": [
+        {"dts_id":"totalItems","csv_name":"nbChildren", "mandatory":"True"},
+        {"dts_id":"title"}
+    ],
+    "RESOURCES": [
+        {"dts_id":"dts:dublincore/dc:language","csv_name":"language"},
+        {"dts_id":"title"},
+        {"dts_id":"description"}
+    ]   
+}
+
+
 def params():
     url_sine_qua_non()
     col_1, col_2 = st.columns(2)
@@ -140,7 +178,7 @@ def params():
         st.write('-----------------------------')
         st.subheader('JSON VIEWER')
         #st.write(stuff)
-        json_viewer(stuff)
+        json_viewer(st.session_state.json_url)
 
 
 
@@ -214,13 +252,34 @@ def about():
     st.write(infos)
 
 def end_screen():
-    st.header('READY TO GENERATE THE CSV')
+    st.header('READY TO GENERATE THE CSV')    
 
 
     st.title('&#8595')
-    if st.button('DOWNLOAD CSV'):
+    maison = expanduser("~")
+    SAXON_JAR_PATH=maison+"/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar"
+    TEI_XSL_STYLESHEETS_PATH = maison + "/dev/tei/install/tei-xsl"
+    if st.button('EXTRACT CSV'):
+       #set_vars()
         # what is optional
-        st.write('boum')
+        json_output = {
+    "SAXON_JAR_PATH":SAXON_JAR_PATH,
+    "TEI_XSL_STYLESHEETS_PATH":TEI_XSL_STYLESHEETS_PATH,
+    "DTS_URL":st.session_state.url,
+    "DTS_COLLECTIONS_ENTRYPOINT":"collections", #handled in settings/sidebar?
+    "DTS_DOCUMENTS_ENTRYPOINT":"documents", #handled in settings/sidebar?
+    "START_COLLECTION_ID": st.session_state.step2_output["ROOT_COLLECTION_ID"],
+    "MAX_DEPTH":st.session_state.step2_output["MAX_DEPTH"],
+    "RETRIEVE_FILES":st.session_state.step2_output["RETRIEVE_FILES"],
+    "TRANSFORM_TEI_TO_TXT":st.session_state.step2_output["TRANSFORM_TEI_TO_TXT"],
+    "TRANSFORM_TEI_TO_HTML":st.session_state.step2_output["TRANSFORM_TEI_TO_HTML"],
+    "INLINE_TXT_IN_CSV":st.session_state.step2_output["INLINE_TXT_IN_CSV"],
+    "COLLECTIONS": st.session_state.collections,
+    "RESOURCES": st.session_state.ressources
+    }
+        #dts2csv.apply_all(json_output)
+        #d2c.extract_all(json_output)
+        st.write(json_output)
 
     st.title('&#8593')
 
@@ -254,6 +313,7 @@ def mode_director():
 
 
 def main():
+    #st.write(stuff2)
     opening_style()
     #set_vars()>instead only call in functions that need them
     init_session_state()
@@ -271,19 +331,26 @@ def main():
 
 
 
-def check_url(): #if no url in session states, launches start screen, else passes
+def check_url(to_check): #if no url in session states, launches start screen, else passes
     try:
-        response = requests.get(st.session_state.url)
+        st.write('intry')
+        with urllib.request.urlopen(to_check) as url:
+            st.session_state.json_url = json.loads(url.read().decode())
+        st.write('should work')
+        st.write(st.session_state.json_url)
+        
+        #response = requests.get(st.session_state.url)
+        #if response.status_code == 200:
+         #st.success('This URL seems valid! You can now select how you want to build your CSV with the modes II-IV or'
+                       #' jump directly to the Download menu V')
+        #else:
+         #   st.error('Web site does not exist')
     except:
         st.error('Not a valid URL. Please try again')
         #closing_style()
-        st.stop()
+        #st.stop()
 
-    if response.status_code == 200:
-        st.success('This URL seems valid! You can now select how you want to build your CSV with the modes II-IV or'
-                   ' jump directly to the Download menu V')
-    else:
-        st.error('Web site does not exist')
+    
 
         # other errors to handle? like 404?
 
@@ -329,17 +396,18 @@ def form_screen_one(out_name):
         # end of form
         submitted = st.form_submit_button('III. Collections')
     if submitted:
-        #mk_list('collection')
-        out = {'DTS_URL':st.session_state.url,
+
+        st.session_state.step2_output = {
+                'DTS_COLLECTIONS_ENTRYPOINT':'collections',
+                'DTS_RESOURCES_ENTRYPOINT':'documents', #where put option to change it
+                'DTS_URL':st.session_state.url,
                 'ROOT_COLLECTION_ID':ROOT_COLLECTION_ID,
                'MAX_DEPTH':MAX_DEPTH,
                'RETRIEVE_FILES':RETRIEVE_FILES,
               'TRANSFORM_TEI_TO_TXT':TRANSFORM_TEI_TO_TXT,
               'TRANSFORM_TEI_TO_HTML':TRANSFORM_TEI_TO_HTML,
                'INLINE_TXT_IN_CSV':INLINE_TXT_IN_CSV}
-        st.session_state.step2_output = out #this is a dictionary
 
-        st.write(out)
 
 
 
@@ -356,7 +424,7 @@ def screen_one():
     set_vars()
     rootUrl = st.session_state.url
     # * make default def_col, def_doc and if changed provide button to change it
-    with st.sidebar.expander('+'):
+    with st.expander('change default name >*remove?'):
         colls = st.text_input('Collections name:', 'collections')
         doc = st.text_input('Documents name:', 'document')
         navi = st.text_input('Navigation name:', 'navigation')
@@ -366,7 +434,7 @@ def screen_one():
         default_id = str(st.session_state.url)
         DATASET_ID = st.text_input('Dataset ID:', default_id)
         #make split of default id string
-    out_name = st.sidebar.text_input('Name of the CSV file: ', 'output')
+    out_name = st.text_input('Name of the CSV file: ', 'output')
     st.sidebar.image('logo.png')
     form_screen_one(out_name)
 
@@ -375,7 +443,7 @@ def screen_one():
     #
     #END of screen1
     reset_app = st.button('RESET')
-    del st.session_state['url']
+    #del st.session_state['url']
     #from streamlit import caching
     #caching.clear_cache()
     if reset_app:
