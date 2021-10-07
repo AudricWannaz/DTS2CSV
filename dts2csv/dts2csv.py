@@ -43,7 +43,7 @@ TEI_TO_TXT_XSL=os.sep+"txt"+os.sep+"tei-to-text.xsl"
 BREATH_TIME_SEC=0.1
 RETRY_TIME_SEC=1
 
-TARGET_PATH="."
+TARGET_PATH="./dts2csv_extract"
 
 ### from https://stackoverflow.com/questions/3853722/how-to-insert-newlines-on-argparse-help-text
 class RawFormatter(HelpFormatter):
@@ -642,7 +642,7 @@ def extract_all(conf):
 
     print("Finished extraction, files generated in '"+os.path.abspath(TARGET_PATH)+"', bye bye.")
 
-    return TARGET_PATH
+    return os.path.abspath(TARGET_PATH)
     
 if __name__ == "__main__":
 
