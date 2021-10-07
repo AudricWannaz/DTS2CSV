@@ -93,7 +93,12 @@ def normalizeCsvContent(text):
     return str(text).replace("\n",MX_CSV_CR_MARKER).replace(";",MX_ESCAPED_SEPARATOR).strip()
 
 def normalizeIdString(text):
+    text=str(text)
+    # remove trailing '/' in URL (potentially used for ID)
+    if text.endswith("/"):
+        text=text[:-1]
     return str(text).replace("https://","").replace("/","-").replace("urn:","").replace(":",".").strip()
+
 
 # call Saxon and Tei-XSL stylesheets to convert TEI file in required format
 def convertTei(conf,teiFile,stylesheet,outputFile):    
@@ -113,7 +118,7 @@ def retrieveTeiFile(entrypoint,urn,targetFileName,nbtries=TEI_DOWNLOAD_NBTRIES):
             print("I tried enough, aborting sorry.")
             sys.exit(1)
 
-        time.sleep(RETRY_TIME_SEC)
+        time.sleep(RETRY_TIME_SEC*(TEI_DOWNLOAD_NBTRIES-nbtries+1))
         return retrieveTeiFile(entrypoint,urn,targetFileName,nbtries-1)
 
     elif nbtries<TEI_DOWNLOAD_NBTRIES:    
@@ -355,14 +360,20 @@ def computeTextSatistics(textFile,withInlineCsv):
     # used when option for inline contents in CSV has been required by user
     globalCsvLine=""
 
-    with open(textFile) as f:
-        for line in f:
-            stats['nbChars']+=len(line)
-            stats['nbWords']+=len(line.split())
-            stats['nbLines']+=1
-            if withInlineCsv==True:
-                globalCsvLine+=line.replace("\n",MX_CSV_CR_MARKER).replace(";",MX_ESCAPED_SEPARATOR)
+    try:
+        with open(textFile) as f:
+            for line in f:
+                stats['nbChars']+=len(line)
+                stats['nbWords']+=len(line.split())
+                stats['nbLines']+=1
+                if withInlineCsv==True:
+                    globalCsvLine+=line.replace("\n",MX_CSV_CR_MARKER).replace(";",MX_ESCAPED_SEPARATOR)
     
+    except Exception as e:
+        print("ERROR: unable to open file '"+str(textFile)+"': "+str(e))
+        print("ERROR: skipping statistics for file '"+str(textFile)+"'")
+        globalCsvLine="***File Not Found***"
+            
     return stats,globalCsvLine
     
 
@@ -608,12 +619,8 @@ def checkConfConsistency(conf):
                                                         +str(conf["INLINE_TXT_IN_CSV"])+" in your config)")
         sys.exit(1)
 
-def dts2csv(configfileJson):
+def extract_all(conf):
 
-    if not os.path.isfile(configfileJson):
-        print("ERROR: given config file not reachable : '"+configfileJson+"'")
-        sys.exit(1)
-    conf=loadConfig(configfileJson)
     checkConfConsistency(conf)
 
     if not os.path.isfile(TARGET_PATH):
@@ -631,7 +638,8 @@ def dts2csv(configfileJson):
     dumpResourcesCsv(conf,TARGET_PATH+os.sep+"resources.csv",retrievedDtsResources,conf["RESOURCES"])
     aggregateCollectionsStats(conf,retrievedDtsResources,retrievedDtsCollections)
     dumpCollectionsCsv(conf,TARGET_PATH+os.sep+"collections.csv",retrievedDtsCollections,conf["COLLECTIONS"])    
-    print("Files generated in '"+TARGET_PATH+"', you can now import them into metaindex.fr if you wish! bye bye.")
+    
+    return TARGET_PATH
     
 if __name__ == "__main__":
 
@@ -650,5 +658,13 @@ if __name__ == "__main__":
         print("ERROR: missing input argument: configfile")
         sys.exit(1)
 
-    dts2csv(args.configfile)
+
+    if not os.path.isfile(args.configfile):
+        print("ERROR: given config file not reachable : '"+confJson+"'")
+        sys.exit(1)
+
+    confJson=loadConfig(args.configfile)
+    generatedFolder= extract_all(confJson)
+
+    print("Files generated in '"+generatedFolder+"', bye bye.")
     
