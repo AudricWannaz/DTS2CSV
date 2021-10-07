@@ -149,7 +149,7 @@ stuff2 = {
     "TEI_XSL_STYLESHEETS_PATH":"HOME/dev/tei/install/tei-xsl",
     "DTS_URL":"https://dts.perseids.org/",
     "DTS_COLLECTIONS_ENTRYPOINT":"collections",
-    "DTS_DOCUMENTS_ENTRYPOINT":"documents",
+    "DTS_DOCUMENTS_ENTRYPOINT":"document",
     "START_COLLECTION_ID":"urn:perseids:latinLit",
     "MAX_DEPTH":"None",
     "RETRIEVE_FILES":"True",
@@ -265,9 +265,9 @@ def end_screen():
         json_output = {
     "SAXON_JAR_PATH":SAXON_JAR_PATH,
     "TEI_XSL_STYLESHEETS_PATH":TEI_XSL_STYLESHEETS_PATH,
-    "DTS_URL":st.session_state.url,
+    "DTS_URL":st.session_state.url+'/',
     "DTS_COLLECTIONS_ENTRYPOINT":"collections", #handled in settings/sidebar?
-    "DTS_DOCUMENTS_ENTRYPOINT":"documents", #handled in settings/sidebar?
+    "DTS_DOCUMENTS_ENTRYPOINT":"document", #handled in settings/sidebar?
     "START_COLLECTION_ID": st.session_state.step2_output["ROOT_COLLECTION_ID"],
     "MAX_DEPTH":st.session_state.step2_output["MAX_DEPTH"],
     "RETRIEVE_FILES":st.session_state.step2_output["RETRIEVE_FILES"],
@@ -278,8 +278,9 @@ def end_screen():
     "RESOURCES": st.session_state.ressources
     }
         #dts2csv.apply_all(json_output)
-        #d2c.extract_all(json_output)
         st.write(json_output)
+        d2c.extract_all(json_output)
+        #
 
     st.title('&#8593')
 
@@ -360,7 +361,7 @@ def form_screen_one(out_name):
     with st.form('main_form'):
         st.header('1. Mandatory inputs')
         # where to start from
-        ROOT_COLLECTION_ID = "urn" + st.text_input('Enter a valid collection ID')
+        ROOT_COLLECTION_ID = st.text_input('Enter a valid collection ID')
 
         # where to store generated files
         # TARGET_PATH=home+st.text_input('Enter a valid PATH') # update this with better st features> at best not used, downloads is ok
@@ -399,7 +400,7 @@ def form_screen_one(out_name):
 
         st.session_state.step2_output = {
                 'DTS_COLLECTIONS_ENTRYPOINT':'collections',
-                'DTS_RESOURCES_ENTRYPOINT':'documents', #where put option to change it
+                'DTS_RESOURCES_ENTRYPOINT':'document', #where put option to change it
                 'DTS_URL':st.session_state.url,
                 'ROOT_COLLECTION_ID':ROOT_COLLECTION_ID,
                'MAX_DEPTH':MAX_DEPTH,
