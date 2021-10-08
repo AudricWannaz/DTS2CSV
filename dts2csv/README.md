@@ -3,7 +3,7 @@
 DTS2CSV allows you to extract contents from a DTS API as local CSV file.
 It can also retrieve corresônding TEI files and, if Saxon and TEI-XSL are available on your computer, automatically convert them as Text and HTML files.
 
-In that las t case, basic statistical info in generated (nbWords for example) and added to CSV contents.
+In that last case, basic statistical info in generated (nbWords for example) and added to CSV contents.
 
 # Architecture
 
@@ -19,15 +19,15 @@ JSON file shall have following fields:
 - *RETRIEVE_FILES* (True|False) : if True, download also TEI files.
 - *TRANSFORM_TEI_TO_TXT*: convert TEI file to text (required Saxon and TEI-XSL - see below). When activated, lines, words and chars counts are performed and aggregated also to each parent collections, in order to facilitate potential quantitative study of the corpus.
 - *TRANSFORM_TEI_TO_HTML*: convert TEI file to HTML (required Saxon and TEI-XSL - see below)
-- *INLINE_TXT_IN_CSV*: put text contents into CSV file itself (replacing new lines by special "__CR__" marker). This can be useful to load contents at once in third party application such as [https://metaindex.fr].
+- *INLINE_TXT_IN_CSV*: put text contents into CSV file itself (replacing new lines by special "__CR__" marker). This can be useful to load contents at once in third party application such as https://metaindex.fr.
 
 - *COLLECTIONS* and *RESOURCES*: list of custom json attributes to extract into CSV. Each element shall be  dictionary with at least 'dts_id' field, and optionaly 'csv_name' field.
 'dts_id' shall be the path to the required attribute, starting from json root, using '/' as separator (like a folders hierarchy for example). 
 For example { 'dts_id'="dts:extensions/ns1:language", "cvs_name"="language" } will extract parameter <root>/dts:extensions/ns1:language from json contents and store it in a 'language' column of the generated CSV file.
 For arrays, the <param>[n] syntax can be used to reach the nth element of the list (starting from 0).
 
- - *SAXON_JAR_PATH*: location in host of the saxon-he-10.5.jar file (see [https://sourceforge.net/projects/saxon/files/Saxon-HE/])
- - *TEI_XSL_STYLESHEETS_PATH*: location in host of folder containing html5/html5.xsl and text/tei-to-text.xsl files (see [https://github.com/TEIC/Stylesheets])
+ - *SAXON_JAR_PATH*: location in host of the saxon-he-10.5.jar file (see https://sourceforge.net/projects/saxon/files/Saxon-HE/)
+ - *TEI_XSL_STYLESHEETS_PATH*: location in host of folder containing html5/html5.xsl and text/tei-to-text.xsl files (see https://github.com/TEIC/Stylesheets)
  
 Full example:
 
