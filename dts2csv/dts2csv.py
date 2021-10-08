@@ -15,6 +15,7 @@
 # See full version of LICENSE in <https://fsf.org/>
 #
 
+import shutil
 import sys
 import argparse
 import os
@@ -291,8 +292,8 @@ def processResourceDtsElement(conf,elementInfo,entrypoint,parentDtsObj,urn,csvId
 
     if conf["RETRIEVE_FILES"]==True:
 
-        os.makedirs(TARGET_PATH+os.sep+"files",exist_ok=True)
-        fileBaseName=TARGET_PATH+os.sep+"files"+os.sep+normalizeUrn(csvId)
+        os.makedirs(conf["TARGET_PATH"]+os.sep+"files",exist_ok=True)
+        fileBaseName=conf["TARGET_PATH"]+os.sep+"files"+os.sep+normalizeUrn(csvId)
         teiFileName=fileBaseName+".xml"
         
         print("downloading "+teiFileName)
@@ -589,6 +590,13 @@ def loadConfig(fileName):
 def checkConfConsistency(conf):
     
     # check conf consistency
+
+    if not os.path.isfile(conf["TARGET_PATH"]):
+        try:
+            os.makedirs(conf["TARGET_PATH"],exist_ok=True)
+        except Exception as e:
+            raise FileNotFoundError("unable to create target folder '"+str(conf["TARGET_PATH"])+"': "+str(e))
+    
     if (conf["TRANSFORM_TEI_TO_TXT"]==True or conf["TRANSFORM_TEI_TO_HTML"]==True) and not conf["RETRIEVE_FILES"]==True:
         raise AssertionError("from your config file, RETRIEVE_FILES="+str(conf["RETRIEVE_FILES"])+" while it must be True if you want to use option TRANSFORM_TEI_TO_TXT ("\
                                                         +str(conf["TRANSFORM_TEI_TO_TXT"])+" in your config) or TRANSFORM_TEI_TO_HTML ("+str(conf["TRANSFORM_TEI_TO_HTML"])+" in your config)")
@@ -607,29 +615,33 @@ def checkConfConsistency(conf):
         raise AssertionError("ERROR: from your config file, TRANSFORM_TEI_TO_TXT="+str(conf["TRANSFORM_TEI_TO_TXT"])+" while it must be True if you want to use option INLINE_TXT_IN_CSV ("\
                                                         +str(conf["INLINE_TXT_IN_CSV"])+" in your config)")
 
-def extract_all(conf):
+def extract_all(conf, targetFolder=TARGET_PATH, zipResult=False):
 
+    conf["TARGET_PATH"]=targetFolder
     checkConfConsistency(conf)
-
-    if not os.path.isfile(TARGET_PATH):
-        try:
-            os.makedirs(TARGET_PATH,exist_ok=True)
-        except Exception as e:
-            raise FileNotFoundError("unable to create target folder '"+str(TARGET_PATH)+"': "+str(e))
     
     rootElementInfo={"@id":conf["START_COLLECTION_ID"], "@type":"Collection"}
     collectionsEntryUrl=conf["DTS_URL"]+"/"+conf["DTS_COLLECTIONS_ENTRYPOINT"]
     
     processDtsElement(conf,rootElementInfo,collectionsEntryUrl,None)
 
-    dumpResourcesCsv(conf,TARGET_PATH+os.sep+"resources.csv",retrievedDtsResources,conf["RESOURCES"])
+    dumpResourcesCsv(conf,conf["TARGET_PATH"]+os.sep+"resources.csv",retrievedDtsResources,conf["RESOURCES"])
     aggregateCollectionsStats(conf,retrievedDtsResources,retrievedDtsCollections)
-    dumpCollectionsCsv(conf,TARGET_PATH+os.sep+"collections.csv",retrievedDtsCollections,conf["COLLECTIONS"])    
+    dumpCollectionsCsv(conf,conf["TARGET_PATH"]+os.sep+"collections.csv",retrievedDtsCollections,conf["COLLECTIONS"])    
     
+    if zipResult==True:
+        zipName=os.path.basename(conf["TARGET_PATH"])
+        if len(zipName)==0 or zipName=="." or zipName=="..":
+            zipName="dts2csv_extract"
+        zipName=conf["TARGET_PATH"]+os.sep+".."+os.sep+zipName
+        shutil.make_archive(zipName, "zip", conf["TARGET_PATH"])
+        print("Finished extraction, files generated in '"+os.path.abspath(zipName+".zip")+"', bye bye.")
+        return os.path.abspath(zipName+".zip")
+    else:
+        print("Finished extraction, files generated in '"+os.path.abspath(conf["TARGET_PATH"])+"', bye bye.")
+        return os.path.abspath(conf["TARGET_PATH"])
 
-    print("Finished extraction, files generated in '"+os.path.abspath(TARGET_PATH)+"', bye bye.")
-
-    return os.path.abspath(TARGET_PATH)
+    
     
 if __name__ == "__main__":
 
@@ -638,6 +650,7 @@ if __name__ == "__main__":
     parser.add_argument("configfile",nargs='?',default="",help="python file containing configuration data (see full example in description text up there).")
     parser.add_argument("-sampleconf", action="store_true", help="display a sample config file.")
     parser.add_argument("-o", nargs='?',default="./dts2csv_extract", help="folder where to store resulting data")
+    parser.add_argument("-z", action="store_true", help="compress result as a zip file")
     parser.add_argument("--version", action="version", version="%(prog)s v"+VERSION)
     args = parser.parse_args()
 
@@ -654,12 +667,13 @@ if __name__ == "__main__":
         print("ERROR: given config file not reachable : '"+confJson+"'")
         sys.exit(1)
 
+    targetPath=TARGET_PATH
     if len(args.o)!=0:
-        TARGET_PATH=args.o
-
+        targetPath=args.o
+    
     try:
         confJson=loadConfig(args.configfile)
-        generatedFolder= extract_all(confJson)
+        generatedFolder= extract_all(confJson,targetPath,args.z)
     except Exception as e:
         print("ERROR: "+str(e))
 
