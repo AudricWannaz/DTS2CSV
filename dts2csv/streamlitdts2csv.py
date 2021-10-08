@@ -8,8 +8,8 @@ import requests
 import os
 from os.path import expanduser
 
-def next_button():
-    if st.button('MOVE TO NEXT STEP'):
+#def next_button():
+ #   if st.button('MOVE TO NEXT STEP'):
 
 
 
