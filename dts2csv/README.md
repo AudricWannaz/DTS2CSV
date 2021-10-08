@@ -1,7 +1,7 @@
 # Overview
 
 DTS2CSV allows you to extract contents from a DTS API as local CSV file.
-It can also retrieve corresônding TEI files and, if Saxon and TEI-XSL are available on your computer, automatically convert them as Text and HTML files.
+It can also retrieve corresponding TEI files and, if Saxon and TEI-XSL are available on your computer, automatically convert them as Text and HTML files (and compute basic statistics out of textual version).
 
 In that last case, basic statistical info in generated (nbWords for example) and added to CSV contents.
 
