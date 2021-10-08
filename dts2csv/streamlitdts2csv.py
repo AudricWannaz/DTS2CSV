@@ -246,6 +246,8 @@ def end_screen():
         try:
             with st.spinner('EXTRACTING ... This might take some time, depending on target size'):
                 extracted = d2c.extract_all(json_output, True)
+                st.write(extracted)
+                st.write(type(extracted))
                 with st.download_button('DOWNLOAD EXTRACTED CSV',extracted, file_name='output', mime=None, key=None, help=None,
                         on_click=st.balloons, args=None, kwargs=None):
                     #st.balloons()
