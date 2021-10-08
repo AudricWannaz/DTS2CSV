@@ -209,7 +209,7 @@ def about():
     See full version of LICENSE in <https://fsf.org/>
 
     If you use this tool please be fair and cite it, if possible as follows:
-    DTS2CSV 3.2 (Streamlit Version 1.0), Laurent ML and Audric Wannaz, *github link*
+    DTS2CSV 3.2 (Streamlit Version 1.0), Laurent ML and Audric Wannaz, https://github.com/AudricWannaz/DTS2CSV
 
     '''
     st.write(infos)
@@ -248,11 +248,12 @@ def end_screen():
                 extracted = d2c.extract_all(json_output, True)
                 with st.download_button('DOWNLOAD EXTRACTED CSV',extracted, file_name='output', mime=None, key=None, help=None,
                         on_click=st.balloons, args=None, kwargs=None):
-                    st.balloons()
+                    #st.balloons()
+                    st.success('DTS SUCCESSFULLY DOWNLOADED AS CSV')
                     
             st.success('CSV successfully extracted!')
         except Exception as e:            
-            st.info('Sorry, the web version does not fully work yet! To run this app locally, download the Github repo, install Streamlit with pip install streamlit and run "streamlit run streamlitdtscsv.py" in a terminal in the dtscsv folder.')
+            st.info('Sorry, the web version does not fully work yet! To run this app locally, download the Github repo, install Streamlit with pip install streamlit and run "streamlit run streamlitdtscsv.py" in a terminal in the dtscsv folder. Alternatively, use the tool from the terminal as specified in the docs')
             st.error("Error while extracting contents: "+str(e))
         
 
