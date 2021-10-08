@@ -21,7 +21,7 @@ JSON file shall have following fields:
 - __TRANSFORM_TEI_TO_HTML__: convert TEI file to HTML (requires Saxon and TEI-XSL - see below)
 - __INLINE_TXT_IN_CSV__: put text contents into CSV file itself (replacing new lines by special "\_\_CR\_\_" marker). This can be useful to load contents at once in third party application such as https://metaindex.fr.
 
-- __COLLECTIONS__ and __RESOURCES__: list of custom json attributes to extract into CSV. Each element of the list shall be a dictionary with at least 'dts_id' field, and optionaly 'csv_name' field.
+- __COLLECTIONS__ and __RESOURCES__: list of custom json attributes to extract into CSV. Each element of the list shall be a dictionary with at least 'dts_id' field, and optionally 'csv_name' field.
 'dts_id' shall be the path to the required DTS attribute in the json file returned by the server, starting from json root, using '/' as separator (like a folders hierarchy for example). 
 For example { 'dts_id'="dts:extensions/ns1:language", "cvs_name"="language" } will extract parameter <root>/dts:extensions/ns1:language from json contents and store it in a 'language' column of the generated CSV file. 
 For arrays, the <param>[n] syntax can be used to reach the nth element of the list (starting from 0).
