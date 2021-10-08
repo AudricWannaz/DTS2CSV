@@ -248,6 +248,7 @@ def end_screen():
                 extracted = d2c.extract_all(json_output, True)
                 with st.download_button('DOWNLOAD EXTRACTED CSV',extracted, file_name='output', mime=None, key=None, help=None,
                         on_click=st.balloons, args=None, kwargs=None):
+                    st.balloons()
                     
             st.success('CSV successfully extracted!')
         except Exception as e:            
