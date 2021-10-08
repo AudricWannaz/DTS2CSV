@@ -245,7 +245,10 @@ def end_screen():
         st.write(json_output)
         try:
             with st.spinner('EXTRACTING ... This might take some time, depending on target size'):
-                d2c.extract_all(json_output)
+                extracted = d2c.extract_all(json_output, True)
+                with st.download_button('DOWNLOAD EXTRACTED CSV',extracted, file_name='output', mime=None, key=None, help=None,
+                        on_click=st.balloons, args=None, kwargs=None):
+                    
             st.success('CSV successfully extracted!')
         except Exception as e:            
             st.info('Sorry, the web version does not fully work yet! To run this app locally, download the Github repo, install Streamlit with pip install streamlit and run "streamlit run streamlitdtscsv.py" in a terminal in the dtscsv folder.')
