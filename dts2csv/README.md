@@ -17,8 +17,8 @@ JSON file shall have following fields:
 - *START_COLLECTION_ID*: DTS ID of the collection where to start from. Generally start from 'default' to start from the root.
 - *MAX_DEPTH*: how deep to go in the collections. For example stop at '2' just to get an overview of the main groups. 'None' means go as deep as you can.
 - *RETRIEVE_FILES* (True|False) : if True, download also TEI files.
-- *TRANSFORM_TEI_TO_TXT*: convert TEI file to text (required Saxon and TEI-XSL - see below). When activated, lines, words and chars counts are performed and aggregated also to each parent collections, in order to facilitate potential quantitative study of the corpus.
-- *TRANSFORM_TEI_TO_HTML*: convert TEI file to HTML (required Saxon and TEI-XSL - see below)
+- *TRANSFORM_TEI_TO_TXT*: convert TEI file to text (requires Saxon and TEI-XSL - see below). When activated, lines, words and chars counts are performed and aggregated also to each parent collections, in order to facilitate potential quantitative study of the corpus.
+- *TRANSFORM_TEI_TO_HTML*: convert TEI file to HTML (requires Saxon and TEI-XSL - see below)
 - *INLINE_TXT_IN_CSV*: put text contents into CSV file itself (replacing new lines by special "__CR__" marker). This can be useful to load contents at once in third party application such as https://metaindex.fr.
 
 - *COLLECTIONS* and *RESOURCES*: list of custom json attributes to extract into CSV. Each element shall be  dictionary with at least 'dts_id' field, and optionaly 'csv_name' field.
