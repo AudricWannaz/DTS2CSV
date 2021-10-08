@@ -8,6 +8,10 @@ import requests
 import os
 from os.path import expanduser
 
+def next_button():
+    if st.button('MOVE TO NEXT STEP'):
+
+
 
 def home():
     st.title('I. URL')
@@ -39,6 +43,7 @@ def home():
 
 
     st.subheader('B. JSON CONFIG FILE (for advanced users)')
+    st.info('ROADMAP FEATURE ONLY!')
     with st.expander('+'):
         uploaded_file = st.file_uploader("Choose a file")
         if uploaded_file is not None:
@@ -159,9 +164,9 @@ def extras():
         st.write('This app is powered by Streamlit. This means you can access native Streamlit visual settings by clicking the top right corner of your screen.')
     with st.expander('Advanced Settings'):
     #with st.expander('Manage stored URLS'):
-        st.write('porbably roadmap only')
+        st.write('ROADMAP FEATURE')
     with st.expander('Personalise Graphics'):
-        st.write('porbably roadmap only')
+        st.write('ROADMAP FEATURE')
         st.write('wow such empty')    
 
     st.write('*')
@@ -173,6 +178,11 @@ def extras():
         st.write('The CSV format...')
     with st.expander('Can I use this tool from the terminal?'):
         st.write('Yes! Go to ...')
+
+    st.title('ROADMAP')
+    with st.expander('see roadmap'):
+        roadmap_list = ['json input jumps from step I. to step V.','"next" and "reset" button at each screen', 'more complex json viewer', 'more help infos', 'better collections/resources input UI', 'user can change widget values in settings', 'dts2pdf collaboration']
+        st.write(roadmap_list)
 
 def closing_style():
     st.image('https://raw.githubusercontent.com/AudricWannaz/DTS2CSV/main/dts2csv/logo.png')
@@ -384,14 +394,8 @@ if __name__ == '__main__':
 
 
 #&&&&&&&&&&&&& UNUSED &&&&&&&&&&&&&&&&&&&&&&&&
-
-# decide if throw away this evening
 def sendJSON_button(pre_json):
     json_out = json.dumps(pre_json)
     download_csv = st.download_button('DOWNLOAD', json_out, file_name=out_name + '.json', mime=None, key=None, help=None,
                         on_click=st.balloons, args=None, kwargs=None)   
-# has to chaneg actually since we will only download csv
-        #if download_csv: revoir ca
 
-# roadmap = [change_slider_max_val, dts2pdf?, input jsonfile>jumps at V., reset_button, change_arrows for custom unicode]
-# how does terminal react in deployed app?
