@@ -175,7 +175,7 @@ def extras():
         st.write('Yes! Go to ...')
 
 def closing_style():
-    st.image('logo.png')
+    st.image('https://github.com/AudricWannaz/DTS2CSV/blob/main/dts2csv/logo.png')
     #add collapser bar
     with st.expander('CREDITS'):
         about()
