@@ -209,6 +209,7 @@ def end_screen():
 
 
     st.title('&#8595')
+    #find better arrows at https://unicode-table.com/en/sets/arrow-symbols/
     maison = expanduser("~")
     SAXON_JAR_PATH=maison+"/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar"
     TEI_XSL_STYLESHEETS_PATH = maison + "/dev/tei/install/tei-xsl"
