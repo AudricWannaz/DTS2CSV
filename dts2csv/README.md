@@ -11,10 +11,10 @@ In that las t case, basic statistical info in generated (nbWords for example) an
 dts2csv,py takes a JSON config file as input, and walk through DTS API to extract contents.
 
 JSON file shall have following fields:
-*DTS_URL*: URL fo the DTS API server
-*DTS_COLLECTIONS_ENTRYPOINT* and *DTS_DOCUMENTS_ENTRYPOINT*: entrypoint names for collections and documents. 
+- *DTS_URL*: URL fo the DTS API server
+- *DTS_COLLECTIONS_ENTRYPOINT* and *DTS_DOCUMENTS_ENTRYPOINT*: entrypoint names for collections and documents. 
 (Navigation API is not used at all by the tool)
-*START_COLLECTION_ID*: DTS ID of the collection where to start from. Generally start from 'default' to start from the root.
+- *START_COLLECTION_ID*: DTS ID of the collection where to start from. Generally start from 'default' to start from the root.
 *MAX_DEPTH*: how deep to go in the collections. For example stop at '2' just to get an overview of the main groups. 'None' means go as deep as you can.
 *RETRIEVE_FILES* (True|False) : if True, download also TEI files.
 *TRANSFORM_TEI_TO_TXT*: convert TEI file to text (required Saxon and TEI-XSL - see below). When activated, lines, words and chars counts are performed and aggregated also to each parent collections, in order to facilitate potential quantitative study of the corpus.
