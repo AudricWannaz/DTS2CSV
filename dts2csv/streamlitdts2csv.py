@@ -7,11 +7,21 @@ import urllib.request
 import requests
 import os
 from os.path import expanduser
+import base64
 
 #def next_button():
  #   if st.button('MOVE TO NEXT STEP'):
 
 
+def create_download_zip(filename):
+
+    fileBasename=os.path.basename(filename)
+
+    with open(filename, "rb") as f:
+        bytes = f.read()
+        b64 = base64.b64encode(bytes).decode()
+        href = f'<a href="data:file/zip;base64,{b64}" download="'+fileBasename+'" >Download CSV File</a>'
+        st.markdown(href, unsafe_allow_html=True)
 
 def home():
     st.title('I. URL')
@@ -148,9 +158,9 @@ def mk_list(name):
     with st.form('mk_list'):
         for i in range(dicts_num):
             st.write('Enter')
-            a = st.text_input('dbs_id?', key=i)
+            a = st.text_input('dts_id?', key=i)
             b = st.text_input('csv_name?', key=i)
-            st.session_state[f'test{i}'] = {'dbs_id': a, 'csv_name': b}
+            st.session_state[f'test{i}'] = {'dts_id': a, 'csv_name': b}
         submit = st.form_submit_button(f'submit {name}')
         if submit:
             #! change stuff here
@@ -246,12 +256,13 @@ def end_screen():
         try:
             with st.spinner('EXTRACTING ... This might take some time, depending on target size'):
                 extracted = d2c.extract_all(json_output, True)
-                st.write(extracted)
-                st.write(type(extracted))
-                with st.download_button('DOWNLOAD EXTRACTED CSV',extracted, file_name='output', mime=None, key=None, help=None,
-                        on_click=st.balloons, args=None, kwargs=None):
-                    #st.balloons()
-                    st.success('DTS SUCCESSFULLY DOWNLOADED AS CSV')
+                create_download_zip(extracted)
+                #st.write(extracted)
+                #st.write(type(extracted))
+                #with st.download_button('DOWNLOAD EXTRACTED CSV',extracted, file_name='output', mime=None, key=None, help=None,
+                #        on_click=st.balloons, args=None, kwargs=None):
+                #    #st.balloons()
+                #    st.success('DTS SUCCESSFULLY DOWNLOADED AS CSV')
                     
             st.success('CSV successfully extracted!')
         except Exception as e:            
