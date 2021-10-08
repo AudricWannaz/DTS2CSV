@@ -64,7 +64,7 @@ def opening_style():
     col1, col2 = st.columns(2)
     col1.title(' Welcome to DTS2CSV!')
     col1.write('Hackathon Version, October 2021, Ver. 3.2 (1.0)')
-    col2.image('logo.png')
+    col2.image('https://github.com/AudricWannaz/DTS2CSV/blob/main/dts2csv/logo.png')
     st.header('convert any DTS data in a CSV within seconds')
     # *want more?
 
