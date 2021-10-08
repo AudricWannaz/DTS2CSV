@@ -61,6 +61,8 @@ Full example:
 
 ## Front-End GUI
 
+GUI front-end allows you to generate JSON config file more easily. You shall fill in the forms and after each step, submit and then go to next panel thanks to menu on top left of the GUI.
+ 
 # Run it
  
 ## Online instance
