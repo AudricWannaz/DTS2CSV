@@ -335,7 +335,7 @@ def processResourceDtsElement(conf,elementInfo,entrypoint,parentDtsObj,urn,csvId
 def processDtsElement(conf,elementInfo,entrypoint,parentDtsObj,depth=0):
 
     urn = elementInfo["@id"]
-    csvId = normalizeIdString(elementInfo["@id"])
+    csvId = normalizeIdString(conf["DTS_URL"])+"_"+normalizeIdString(elementInfo["@id"])
 
     time.sleep(BREATH_TIME_SEC)
     
@@ -650,6 +650,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="MetaindeX Toolbox - "+__file__+" (from http://metaindex.fr)",description=DESC_TXT,formatter_class=RawFormatter)
     parser.add_argument("configfile",nargs='?',default="",help="python file containing configuration data (see full example in description text up there).")
     parser.add_argument("-sampleconf", action="store_true", help="display a sample config file.")
+    parser.add_argument("-o", nargs='?',default="./dts2csv_extract", help="folder where to store resulting data")
     parser.add_argument("--version", action="version", version="%(prog)s v"+VERSION)
     args = parser.parse_args()
 
@@ -665,6 +666,9 @@ if __name__ == "__main__":
     if not os.path.isfile(args.configfile):
         print("ERROR: given config file not reachable : '"+confJson+"'")
         sys.exit(1)
+
+    if len(args.o)!=0:
+        TARGET_PATH=args.o
 
     confJson=loadConfig(args.configfile)
     generatedFolder= extract_all(confJson)
