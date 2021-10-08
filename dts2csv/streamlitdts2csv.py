@@ -1,22 +1,4 @@
-# questions to Laurent are noted with *
-
-#MAIN QUESTIONS:
-
-# * reset button everywhere > probs yes
-# * json viewer next to 3 and 4 not only 2 > how to adapt json viewrr?
-# * mention this app has been designed for light mode
-# * does it work for macos and windows?
-
-#main todo
-
-#regler probleme dans screen one
-
-# change of collections > stuff like that in advances parameters
-#delete collection/ressources button
-#clean sb
-# initialize json url
-#delete intry should work
-
+#local import
 import dts2csv as d2c
 #imports
 import streamlit as st
@@ -26,19 +8,12 @@ import requests
 import os
 from os.path import expanduser
 
-#st.success('good')
-#st.warning('bad')
-#st.info('info')
-#st.error('very bad')
-
-def dummy():
-    st.write('bridge function')
 
 def home():
-    st.header('A.')
-    with urllib.request.urlopen('https://texts.alpheios.net/api/dts') as url:
-            testez = json.loads(url.read().decode())
-    st.write(testez)
+    st.title('I. URL')
+    st.write('--------------------')
+    st.header('A. URL Input')
+    
     cola, colb = st.columns(2)
     with cola:
 
@@ -82,13 +57,13 @@ def init_session_state():
         st.session_state.step2_output = []
     if 'collections' not in st.session_state:
         st.session_state.collections = []
-    if 'ressources' not in st.session_state:
-        st.session_state.ressources = []
+    if 'resources' not in st.session_state:
+        st.session_state.resources = []
 
 def opening_style():
     col1, col2 = st.columns(2)
     col1.title(' Welcome to DTS2CSV!')
-    col1.write('Hackathon Version, October 2021, Ver. 1.0')
+    col1.write('Hackathon Version, October 2021, Ver. 3.2 (1.0)')
     col2.image('logo.png')
     st.header('convert any DTS data in a CSV within seconds')
     # *want more?
@@ -107,11 +82,11 @@ def set_vars(): # we can use this function to declare variables that we ont chan
 
 def sidebar():
 
-    sb_mode = st.sidebar.selectbox('Navigate by clicking', ['I. URL', 'II. Parameters', 'III.Collections', 'IV.Ressources', 'V. Download CSV', 'VI. Settings/Help'])
+    sb_mode = st.sidebar.selectbox('Navigate by clicking', ['I.URL', 'II.Parameters', 'III.Collections', 'IV.Resources', 'V.Download CSV', 'VI.Settings/Help'])
     st.session_state.mode = sb_mode
 
     st.sidebar.write('*')
-    with st.sidebar.expander(f'Session state upon entry (mode:{st.session_state.mode})'):
+    with st.sidebar.expander(f'Session state upon entry ({st.session_state.mode})'):
 
         st.write('url')
         st.write(st.session_state.url)
@@ -119,18 +94,18 @@ def sidebar():
         st.write(st.session_state.step2_output)
         st.write('collections')
         st.write(st.session_state.collections)
-        st.write('ressources')
-        st.write(st.session_state.ressources)
-        st.write('Progress:')
-    if st.session_state.mode == 'I. URL':
+        st.write('resources')
+        st.write(st.session_state.resources)
+    st.sidebar.write('Progress:')
+    if st.session_state.mode == 'I.URL':
         st.sidebar.progress(20)
-    elif st.session_state.mode == 'II. Parameters':
+    elif st.session_state.mode == 'II.Parameters':
         st.sidebar.progress(40)
     elif st.session_state.mode == 'III.Collections':
         st.sidebar.progress(60)
-    elif st.session_state.mode == 'IV.Ressources':
+    elif st.session_state.mode == 'IV.Resources':
         st.sidebar.progress(80)
-    elif st.session_state.mode == 'V. Download CSV':
+    elif st.session_state.mode == 'V.Download CSV':
         st.sidebar.progress(100)
 
 def url_sine_qua_non():
@@ -141,35 +116,11 @@ def url_sine_qua_non():
     else:
         pass
 
-stuff = [[1,2,3],[3,2,3]] #placeholder json
-
-
-stuff2 = {
-    "SAXON_JAR_PATH":"HOME/dev/tei/install/SaxonHE10-5J/saxon-he-10.5.jar",
-    "TEI_XSL_STYLESHEETS_PATH":"HOME/dev/tei/install/tei-xsl",
-    "DTS_URL":"https://dts.perseids.org/",
-    "DTS_COLLECTIONS_ENTRYPOINT":"collections",
-    "DTS_DOCUMENTS_ENTRYPOINT":"document",
-    "START_COLLECTION_ID":"urn:perseids:latinLit",
-    "MAX_DEPTH":"None",
-    "RETRIEVE_FILES":"True",
-    "TRANSFORM_TEI_TO_TXT":"True",
-    "TRANSFORM_TEI_TO_HTML":"False",
-    "INLINE_TXT_IN_CSV":"True",
-    "COLLECTIONS": [
-        {"dts_id":"totalItems","csv_name":"nbChildren", "mandatory":"True"},
-        {"dts_id":"title"}
-    ],
-    "RESOURCES": [
-        {"dts_id":"dts:dublincore/dc:language","csv_name":"language"},
-        {"dts_id":"title"},
-        {"dts_id":"description"}
-    ]   
-}
-
-
 def params():
+
     url_sine_qua_non()
+    st.title('II. Parameters')
+    st.write('-----------------')
     col_1, col_2 = st.columns(2)
     with col_1:
         screen_one()
@@ -180,18 +131,14 @@ def params():
         #st.write(stuff)
         json_viewer(st.session_state.json_url)
 
-
-
-
 def json_viewer(a_json):
     st.write(a_json)
-
 
 def mk_list(name):
     url_sine_qua_non()
     st.title(f'Describe the {name}')
 
-    dicts_num = st.slider('How many parameters do you need?', 0, 20, 1)
+    dicts_num = st.slider('How many parameters do you need?', 0, 10, 1)
 
     with st.form('mk_list'):
         for i in range(dicts_num):
@@ -201,10 +148,9 @@ def mk_list(name):
             st.session_state[f'test{i}'] = {'dbs_id': a, 'csv_name': b}
         submit = st.form_submit_button(f'submit {name}')
         if submit:
-
+            #! change stuff here
             st.session_state[f'{name}'] = [st.session_state[f'test{i}'] for i in range(dicts_num)]
             st.success(f'{name} updated')
-
 
 def extras():
     st.title('SETTINGS')
@@ -228,27 +174,34 @@ def extras():
     with st.expander('Can I use this tool from the terminal?'):
         st.write('Yes! Go to ...')
 
-
 def closing_style():
     st.image('logo.png')
     #add collapser bar
     with st.expander('CREDITS'):
         about()
-        st.write('This tool war written during the DTS Hackathon (https://distributed-text-services.github.io/workshops/events/2021-hackathon/). License=open(which one?). '
-             'Please refer to this software as following: DTS2CSV Ver 1.0 by Laurent ML (backend) and Audric Wannaz (streamlit GUI)')
+        dts_info = '''This version of DTS2CSV was produced during the 2021 DTS Hackathon
+        \n(https://distributed-text-services.github.io/workshops/events/2021-hackathon/).
+
+        '''
+        st.write(dts_info)
 
 def about():
 
-    infos ='''Dts2csv is also a part of the MetaindeX Toolbox https://metaindex.fr/webapp/toolbox
-    Author: Laurent ML - metaindex.fr + Audric Wannaz 2021
-    If you find this tools useful somehow, please reference MetaindeX project when possible.
+    infos ='''DTS2CSV is also a part of the MetaindeX Toolbox: https://metaindex.fr/webapp/toolbox
+    \nAuthors: Laurent ML (backend), Audric Wannaz (GUI) 2021
      
-    GNU GENERAL PUBLIC LICENSE
-    Version 3.2?, x September 2021
+     
+    License: GNU GENERAL PUBLIC LICENSE
+    Version 3.2 (Streamlit Version 1.0), 8th October 2021
      
     Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
      
-    See full version of LICENSE in <https://fsf.org/>'''
+    See full version of LICENSE in <https://fsf.org/>
+
+    If you use this tool please be fair and cite it, if possible as follows:
+    DTS2CSV 3.2 (Streamlit Version 1.0), Laurent ML and Audric Wannaz, *github link*
+
+    '''
     st.write(infos)
 
 def end_screen():
@@ -275,12 +228,14 @@ def end_screen():
     "TRANSFORM_TEI_TO_HTML":st.session_state.step2_output["TRANSFORM_TEI_TO_HTML"],
     "INLINE_TXT_IN_CSV":st.session_state.step2_output["INLINE_TXT_IN_CSV"],
     "COLLECTIONS": st.session_state.collections,
-    "RESOURCES": st.session_state.ressources
+    "RESOURCES": st.session_state.resources
     }
-        #dts2csv.apply_all(json_output)
+        
         st.write(json_output)
-        d2c.extract_all(json_output)
-        #
+        with st.spinner('EXTRACTING ... This might take some time, depending on target size'):
+            d2c.extract_all(json_output)
+        st.success('CSV successfully extracted!')
+        
 
     st.title('&#8593')
 
@@ -290,55 +245,30 @@ def end_screen():
 
     if st.button('RESET APP'):
         st.write('bim')
-    #download_csv_button
-    #save_config
-    #restart
-    st.write('last screen')
-
-# after app works we can add if session_state.step != x then print warning or stuff
+    
 
 def mode_director():
-    if st.session_state.mode == 'I. URL':
+    if st.session_state.mode == 'I.URL':
         home()
-    elif st.session_state.mode == 'II. Parameters':
+    elif st.session_state.mode == 'II.Parameters':
         params()
     elif st.session_state.mode == 'III.Collections':
         mk_list('collections')
-    elif st.session_state.mode == 'IV.Ressources':
-        mk_list('ressources')
-    elif st.session_state.mode == 'V. Download CSV':
+    elif st.session_state.mode == 'IV.Resources':
+        mk_list('resources')
+    elif st.session_state.mode == 'V.Download CSV':
         end_screen()
     else:
         extras()
 
-
-
-def main():
-    #st.write(stuff2)
-    opening_style()
-    #set_vars()>instead only call in functions that need them
-    init_session_state()
-    sidebar()
-    
-    mode_director()
-    closing_style()
-
-    
-
-
-#task: finish in one way the pipe home>params>mkcol>mkres>finish 
-
-#&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-
-
-
 def check_url(to_check): #if no url in session states, launches start screen, else passes
     try:
-        st.write('intry')
+        
         with urllib.request.urlopen(to_check) as url:
             st.session_state.json_url = json.loads(url.read().decode())
-        st.write('should work')
-        st.write(st.session_state.json_url)
+        
+        st.success('URL saved in session')
+        #st.write(st.session_state.json_url)
         
         #response = requests.get(st.session_state.url)
         #if response.status_code == 200:
@@ -348,44 +278,52 @@ def check_url(to_check): #if no url in session states, launches start screen, el
          #   st.error('Web site does not exist')
     except:
         st.error('Not a valid URL. Please try again')
-        #closing_style()
-        #st.stop()
 
-    
-
-        # other errors to handle? like 404?
-
-
-def form_screen_one(out_name):
+def form_screen_one():
+    rootUrl = st.session_state.url
     out = False
     with st.form('main_form'):
-        st.header('1. Mandatory inputs')
+        st.subheader('Explore target API and select parameters')
+        out_name = st.text_input('Name of the CSV file: ', 'output')
+        with st.expander('Collections and Documents'):
+            colls = st.text_input('Collections name:', 'collections')
+            doc = st.text_input('Documents name:', 'document')
+            #navi = st.text_input('Navigation name:', 'navigation')
+            COLLECTIONS_URL = rootUrl + colls
+            DOCUMENTS_URL = rootUrl + doc
+            #NAVIGATION_URL = rootUrl + navi  # 3 last are default this way and can be changed in sb
+            default_id = str(st.session_state.url)
+            #DATASET_ID = st.text_input('Dataset ID:', default_id)
+            #make split of default id string
+    
+        with st.expander('Advanced'):
+
         # where to start from
-        ROOT_COLLECTION_ID = st.text_input('Enter a valid collection ID')
+            ROOT_COLLECTION_ID = st.text_input('Enter a valid collection ID', 'default')
 
-        # where to store generated files
-        # TARGET_PATH=home+st.text_input('Enter a valid PATH') # update this with better st features> at best not used, downloads is ok
+            # where to store generated files
+            # TARGET_PATH=home+st.text_input('Enter a valid PATH') # update this with better st features> at best not used, downloads is ok
 
-        # set to None for no max depth
-        depths = [None, 1, 2, 3, 'custom']  # where should it stop?
-        if depths == 'custom':
-            depths2 = st.slider('Pick a value', 4, 10)
+            # set to None for no max depth
+            depths = [None, 1, 2, 3, 'custom']  # where should it stop?
+            if depths == 'custom':
+                depths2 = st.slider('Pick a value', 4, 10)
 
-        MAX_DEPTH = st.selectbox('Choose Depth (None=max)', depths)
+            MAX_DEPTH = st.selectbox('Choose Depth (None=max)', depths)
 
-        # set True to download TEI files
-        # RETRIEVE_FILES=True
+            # set True to download TEI files
+            # RETRIEVE_FILES=True
 
-        st.header('2. Optional inputs')
-        with st.expander('show'):
+            
+            
             RETRIEVE_FILES = st.checkbox('RETRIEVE_FILES', True)
 
             # Transorm TEI into Text and HTML requires SAXON and TEI-XSL
             # TRANSFORM_TEI_TO_TXT=True
             # TRANSFORM_TEI_TO_HTML=True
 
-            TRANSFORM_TEI_TO_TXT = st.checkbox('TRANSFORM_TEI_TO_TXT', True)
-            TRANSFORM_TEI_TO_HTML = st.checkbox('TRANSFORM_TEI_TO_HTML', True)
+            TRANSFORM_TEI_TO_TXT = st.checkbox('TRANSFORM_TEI_TO_TXT', False)
+            TRANSFORM_TEI_TO_HTML = st.checkbox('TRANSFORM_TEI_TO_HTML', False)
             # if true, put TEI plain text contents into (resources) CSV file
             # This option needs TRANSFORM_TEI_TO_TXT=True
             if TRANSFORM_TEI_TO_TXT:
@@ -394,118 +332,62 @@ def form_screen_one(out_name):
             else:
                 INLINE_TXT_IN_CSV = False
 
-        # end of form
-        submitted = st.form_submit_button('III. Collections')
-    if submitted:
+            # end of form
+        submitted = st.form_submit_button('Submit Collections')
+        if submitted:
 
-        st.session_state.step2_output = {
-                'DTS_COLLECTIONS_ENTRYPOINT':'collections',
-                'DTS_RESOURCES_ENTRYPOINT':'document', #where put option to change it
-                'DTS_URL':st.session_state.url,
-                'ROOT_COLLECTION_ID':ROOT_COLLECTION_ID,
-               'MAX_DEPTH':MAX_DEPTH,
-               'RETRIEVE_FILES':RETRIEVE_FILES,
-              'TRANSFORM_TEI_TO_TXT':TRANSFORM_TEI_TO_TXT,
-              'TRANSFORM_TEI_TO_HTML':TRANSFORM_TEI_TO_HTML,
-               'INLINE_TXT_IN_CSV':INLINE_TXT_IN_CSV}
-
-
-
-
-
-
-def sendJSON_button(pre_json):
-    json_out = json.dumps(pre_json)
-    download_csv = st.download_button('DOWNLOAD', json_out, file_name=out_name + '.json', mime=None, key=None, help=None,
-                        on_click=st.balloons, args=None, kwargs=None)
-# has to chaneg actually since we will only download csv
-        #if download_csv: revoir ca
+            st.session_state.step2_output = {
+                    'DTS_COLLECTIONS_ENTRYPOINT':'collections',
+                    'DTS_RESOURCES_ENTRYPOINT':'document', #where put option to change it
+                    'DTS_URL':st.session_state.url,
+                    'ROOT_COLLECTION_ID':ROOT_COLLECTION_ID,
+                   'MAX_DEPTH':MAX_DEPTH,
+                   'RETRIEVE_FILES':RETRIEVE_FILES,
+                  'TRANSFORM_TEI_TO_TXT':TRANSFORM_TEI_TO_TXT,
+                  'TRANSFORM_TEI_TO_HTML':TRANSFORM_TEI_TO_HTML,
+                   'INLINE_TXT_IN_CSV':INLINE_TXT_IN_CSV}
 
 def screen_one():
     set_vars()
     rootUrl = st.session_state.url
     # * make default def_col, def_doc and if changed provide button to change it
-    with st.expander('change default name >*remove?'):
-        colls = st.text_input('Collections name:', 'collections')
-        doc = st.text_input('Documents name:', 'document')
-        navi = st.text_input('Navigation name:', 'navigation')
-        COLLECTIONS_URL = rootUrl + colls
-        DOCUMENTS_URL = rootUrl + doc
-        NAVIGATION_URL = rootUrl + navi  # 3 last are default this way and can be changed in sb
-        default_id = str(st.session_state.url)
-        DATASET_ID = st.text_input('Dataset ID:', default_id)
-        #make split of default id string
-    out_name = st.text_input('Name of the CSV file: ', 'output')
-    st.sidebar.image('logo.png')
-    form_screen_one(out_name)
+    
+    
+    form_screen_one()
 
     #
 
     #
     #END of screen1
-    reset_app = st.button('RESET')
+    #reset_app = st.button('RESET')
     #del st.session_state['url']
     #from streamlit import caching
     #caching.clear_cache()
-    if reset_app:
+    #if reset_app:
         #del st.session_state['url']
-        main()
+     #   main()
 
-
+def main():
+    
+    opening_style()
+    init_session_state()
+    sidebar()
+    mode_director()
+    closing_style()
 
 if __name__ == '__main__':
     main()
 
-#////////////////////////////////////////
-# lets see if needed: > bon garde-fou
-def use_later_maybe():
-    mode = st.sidebar.selectbox('choose a mode:', ['DTS2CSV', 'DTS2PDF', 'Load input file', 'Manual input (main mode)','Settings'])
 
-    # This function is called every time we try to download a TEI file
-    # if this function returns False we will skip the file
-    # it it returns True we will actually download it.
-    #
-    # * can this happen elsewhere?
-    # if this function is missing, it is assumed to be always True
-    def config_filterResource(resourceCsvData, resourceJsonData):
-        return True  # retrieve all TEI files
-        # return resourceCsvData["language"]=="en" # retrieve only TEI files marked as english language
+#&&&&&&&&&&&&& UNUSED &&&&&&&&&&&&&&&&&&&&&&&&
 
-    # -------------------------------------------
+# decide if throw away this evening
+def sendJSON_button(pre_json):
+    json_out = json.dumps(pre_json)
+    download_csv = st.download_button('DOWNLOAD', json_out, file_name=out_name + '.json', mime=None, key=None, help=None,
+                        on_click=st.balloons, args=None, kwargs=None)   
+# has to chaneg actually since we will only download csv
+        #if download_csv: revoir ca
 
-    # CSV ids might have some unicity or syntaxic constraints which can be handled here,
-    # to be compatible with Lucene query syntax (used by MetaindeX)
-    def config_idDts2idCsv(dtsId, dtsJsonData):
-        return dtsId.replace('urn:', '').replace(':', '.').replace('urn.',
-                                                                   '')  # the first replace must probably be fixed
-
-    # -------------------------------------------
-
-    # utility function called from DTS/CSV mapping table
-    # replace carriage return by "__CR__" string, so that it can stay in a single line in CSV file.
-    # this string is typically replaced back to carriage return when importing CSV file into metaindex app:
-    # "__CR__" is transcoded to newline by MetaindeX during import
-    # "__MX_ESCAPED_SEPARATOR__" is transcoded to ';' by MetaindeX during import
-    def normalizeText(text):
-        return text.replace("\n", "__CR__").replace("  ", " ").replace(";", "__MX_ESCAPED_SEPARATOR__")
-
-    # -------------------------------------------
-
-    # DTS/CSV mapping table
-    # list of DTS 'path' to put into CSV columns
-    # at least 'url', 'urn', '@id', 'members' (and 'parent'), and '@type' are generated by default, others shall be listed hereunder
-
-    # ask Laurent about that
-    ATTRS_LIST = {
-        "Collection": {"totalItems": {"csvName": "nbChildren", "mandatory": True},
-                       "title": {"csvName": "title", "mandatory": True, "transform": normalizeText},
-                       "dts:extensions/ns2:creator[0]/@value": {"csvName": "author", "mandatory": False},
-                       "dts:extensions/ns2:date": {"csvName": "date", "mandatory": False},
-                       },
-
-        "Resource": {
-            "dts:extensions/ns2:language": {"csvName": "language", "mandatory": True},
-
-        }
-    }
-
+# roadmap = [change_slider_max_val, dts2pdf?, input jsonfile>jumps at V., reset_button, change_arrows for custom unicode]
+# how does terminal react in deployed app?
