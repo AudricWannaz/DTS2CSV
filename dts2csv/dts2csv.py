@@ -615,7 +615,7 @@ def checkConfConsistency(conf):
         raise AssertionError("ERROR: from your config file, TRANSFORM_TEI_TO_TXT="+str(conf["TRANSFORM_TEI_TO_TXT"])+" while it must be True if you want to use option INLINE_TXT_IN_CSV ("\
                                                         +str(conf["INLINE_TXT_IN_CSV"])+" in your config)")
 
-def extract_all(conf, targetFolder=TARGET_PATH, zipResult=False):
+def extract_all(conf, zipResult=False, targetFolder=TARGET_PATH):
 
     conf["TARGET_PATH"]=targetFolder
     checkConfConsistency(conf)
@@ -673,7 +673,7 @@ if __name__ == "__main__":
     
     try:
         confJson=loadConfig(args.configfile)
-        generatedFolder= extract_all(confJson,targetPath,args.z)
+        generatedFolder= extract_all(confJson,args.z,targetPath)
     except Exception as e:
         print("ERROR: "+str(e))
 
