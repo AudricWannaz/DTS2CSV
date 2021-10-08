@@ -181,7 +181,7 @@ def extras():
 
     st.title('ROADMAP')
     with st.expander('see roadmap'):
-        roadmap_list = ['json input jumps from step I. to step V.','"next" and "reset" button at each screen', 'more complex json viewer', 'more help infos', 'better collections/resources input UI', 'user can change widget values in settings', 'dts2pdf collaboration']
+        roadmap_list = ['json input jumps from step I. to step V.','"next" and "reset" button at each screen', 'more complex json viewer', 'more help infos', 'better collections/resources input UI', 'user can change widget values in settings', 'dts2pdf collaboration', 'screencast tutorial']
         st.write(roadmap_list)
 
 def closing_style():
