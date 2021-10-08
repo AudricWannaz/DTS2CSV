@@ -112,28 +112,28 @@ def retrieveTeiFile(entrypoint,urn,targetFileName,nbtries=TEI_DOWNLOAD_NBTRIES):
 
     # get json with information (including name and date) about Earth pictures
     response = requests.get(url,params = {"format": "text"} )
+    
     if response.status_code != 200:
         print("WARNING: status code '"+str(response.status_code)+"' retrieved from given URL, expected was '200': "+url)
         if nbtries==0:
-            print("I tried enough, aborting sorry.")
-            sys.exit(1)
+            raise ReferenceError("Unable to retrieve contents at URL '"+url+"' (status code:"+str(response.status_code)+"), aborting sorry.")
+            
 
         time.sleep(RETRY_TIME_SEC*(TEI_DOWNLOAD_NBTRIES-nbtries+1))
         return retrieveTeiFile(entrypoint,urn,targetFileName,nbtries-1)
 
     elif nbtries<TEI_DOWNLOAD_NBTRIES:    
         print("Tried again, could finally retrieve it: "+url)
-        
+    
     # store data into local file
     try:
         targetfile= open(targetFileName, 'w')
         targetfile.write(response.text)
         targetfile.close()
+        
 
     except Exception as e:
-        print("ERROR: unable to decode as 'json' contents retrieved from URL '"+url+"': "+str(e))
-        print(response.text)
-        sys.exit(1)
+        raise SyntaxError("unable to write TEI contents from URL '"+url+"' into file '"+targetFileName+"' : "+str(e))
    
 
 # retrieve DTS json object at given url/urn
@@ -144,29 +144,27 @@ def retrieveDtsJsonContents(url,urn,nbtries=TEI_DOWNLOAD_NBTRIES):
     if len(urn)>0:
         fullUrl+="?id="+urn
 
-
+    
     # get json with information (including name and date) about Earth pictures
     response = requests.get(fullUrl,params = {"format": "json"} )
     if response.status_code != 200:
         print("WARNING: status code '"+str(response.status_code)+"' retrieved from given URL, expected was '200': "+fullUrl)
         if nbtries==0:
-            print("I tried enough, aborting sorry.")
-            sys.exit(1)
+            raise ReferenceError("Unable to retrieve contents at URL '"+fullUrl+"' (status code:"+str(response.status_code)+"), aborting sorry.")            
 
         time.sleep(RETRY_TIME_SEC)
         return retrieveDtsJsonContents(url,urn,nbtries-1)
 
     elif nbtries<TEI_DOWNLOAD_NBTRIES:    
         print("Tried again, could finally retrieve it: "+fullUrl)
-    
+        
     # convert json to Python object 
     try:
         jsondata = response.json()
         return jsondata
     except Exception as e:
-        print("ERROR: unable to decode as 'json' contents retrieved from URL '"+fullUrl+"': "+str(e))
-        print(response.text)
-        sys.exit(1)
+        raise SyntaxError("malformed 'json' contents retrieved from URL '"+fullUrl+"': "+str(e)+"\n-----\n"+response.text)
+        
 
 def findDtsAttrInList(attrDtsId, attrsList):
     for attrDesc in attrsList:
@@ -187,12 +185,10 @@ def extractValueFromJson(jsonpath, jsondata, isMandatory):
         if m!=None:
             key=m.group(1)
             pos=int(m.group(2))
-
+        
         if key not in curDtsVal:
             if isMandatory:
-                print("ERROR: given attribute path not reachable: '"+jsonpath+"' (key '"+key+"' not defined in contents: ")
-                print(curDtsVal)
-                sys.exit(1)
+                raise AssertionError("given attribute not reachable: '"+jsonpath+"' (key '"+key+"' not defined in json contents)\n---\n"+str(curDtsVal))
             else:
                 return None
         
@@ -210,7 +206,7 @@ def extractDtsJsonContents(conf,csvId,urn,jsondata,entrypoint,parentDtsObj,attrs
     global retrievedDtsResources
     
     if "@type" not in jsondata:
-        print("ERROR: contents retrieved from urn '"+urn+"' do not contain '@type' field, skipping it")
+        raise print("Warning: contents retrieved from urn '"+urn+"' do not contain '@type' field, skipping it")
         return []
 
     sourceId=normalizeIdString(conf["DTS_URL"])
@@ -294,16 +290,6 @@ def processResourceDtsElement(conf,elementInfo,entrypoint,parentDtsObj,urn,csvId
     dtsObj=extractDtsJsonContents(conf,csvId,urn,elementInfo,entrypoint,parentDtsObj,conf["RESOURCES"],depth)
 
     if conf["RETRIEVE_FILES"]==True:
-
-        # apply custom filter if defined
-        try:
-            if not config_filterResource(dtsObj,elementInfo):
-                return
-        except NameError:
-            pass
-        except Exception as e:
-            print("ERROR: while running custom function 'config_filterResource': "+str(e))
-            sys.exit(1)
 
         os.makedirs(TARGET_PATH+os.sep+"files",exist_ok=True)
         fileBaseName=TARGET_PATH+os.sep+"files"+os.sep+normalizeUrn(csvId)
@@ -588,36 +574,38 @@ def loadConfig(fileName):
     jsonConf["TEI_XSL_STYLESHEETS_PATH"]=jsonConf["TEI_XSL_STYLESHEETS_PATH"].replace("HOME",home)
 
     for attrDesc in jsonConf["COLLECTIONS"]:
+        if len(attrDesc["dts_id"])==0:
+            raise AssertionError("one of collections dts_id is empty:" + str(attrDesc)+". Aborting, sorry." )
         if "csv_name" not in attrDesc:
             attrDesc["csv_name"]=attrDesc["dts_id"]
     for attrDesc in jsonConf["RESOURCES"]:
+        if len(attrDesc["dts_id"])==0:
+            raise AssertionError("one of resources dts_id is empty:" + str(attrDesc)+". Aborting, sorry." )
         if "csv_name" not in attrDesc:
             attrDesc["csv_name"]=attrDesc["dts_id"]
 
     return jsonConf        
 
 def checkConfConsistency(conf):
+    
     # check conf consistency
     if (conf["TRANSFORM_TEI_TO_TXT"]==True or conf["TRANSFORM_TEI_TO_HTML"]==True) and not conf["RETRIEVE_FILES"]==True:
-        print("ERROR: from your config file, RETRIEVE_FILES="+str(conf["RETRIEVE_FILES"])+" while it must be True if you want to use option TRANSFORM_TEI_TO_TXT ("\
-                                                        +str(conf["TRANSFORM_TEI_TO_TXT"])+" in your config) or  TRANSFORM_TEI_TO_HTML ("+str(conf["TRANSFORM_TEI_TO_HTML"])+" in your config)")
-        sys.exit(1)
+        raise AssertionError("from your config file, RETRIEVE_FILES="+str(conf["RETRIEVE_FILES"])+" while it must be True if you want to use option TRANSFORM_TEI_TO_TXT ("\
+                                                        +str(conf["TRANSFORM_TEI_TO_TXT"])+" in your config) or TRANSFORM_TEI_TO_HTML ("+str(conf["TRANSFORM_TEI_TO_HTML"])+" in your config)")
+        
 
     if (conf["TRANSFORM_TEI_TO_TXT"]==True or conf["TRANSFORM_TEI_TO_HTML"]==True) and not os.path.isfile(conf["SAXON_JAR_PATH"]):
-        print("ERROR: given SAXON jar file path is not reachable: SAXON_JAR_PATH=\""+str(conf["SAXON_JAR_PATH"])+"\"")
-        sys.exit(1)
+        raise AssertionError("given SAXON jar file path is not reachable: SAXON_JAR_PATH=\""+str(conf["SAXON_JAR_PATH"])+"\"")
 
     if conf["TRANSFORM_TEI_TO_TXT"]==True and not os.path.isfile(conf["TEI_XSL_STYLESHEETS_PATH"]+TEI_TO_TXT_XSL):
-        print("ERROR: given Tei-XSL stylesheets path is not reachable or does not contain expected files. Was expecting file \""+str(conf["TEI_XSL_STYLESHEETS_PATH"]+TEI_TO_TXT_XSL)+"\"")
-        sys.exit(1)
+        raise AssertionError("ERROR: given Tei-XSL stylesheets path is not reachable or does not contain expected files. Was expecting file \""+str(conf["TEI_XSL_STYLESHEETS_PATH"]+TEI_TO_TXT_XSL)+"\"")
+
     if conf["TRANSFORM_TEI_TO_HTML"]==True and not os.path.isfile(conf["TEI_XSL_STYLESHEETS_PATH"]+TEI_TO_HTML5_XSL):
-        print("ERROR: given Tei-XSL stylesheets path is not reachable or does not contain expected files. Was expecting file \""+str(conf["TEI_XSL_STYLESHEETS_PATH"]+TEI_TO_HTML5_XSL)+"\"")
-        sys.exit(1)
+        raise AssertionError("ERROR: given Tei-XSL stylesheets path is not reachable or does not contain expected files. Was expecting file \""+str(conf["TEI_XSL_STYLESHEETS_PATH"]+TEI_TO_HTML5_XSL)+"\"")
 
     if conf["INLINE_TXT_IN_CSV"]==True and not conf["TRANSFORM_TEI_TO_TXT"]==True:
-        print("ERROR: from your config file, TRANSFORM_TEI_TO_TXT="+str(conf["TRANSFORM_TEI_TO_TXT"])+" while it must be True if you want to use option INLINE_TXT_IN_CSV ("\
+        raise AssertionError("ERROR: from your config file, TRANSFORM_TEI_TO_TXT="+str(conf["TRANSFORM_TEI_TO_TXT"])+" while it must be True if you want to use option INLINE_TXT_IN_CSV ("\
                                                         +str(conf["INLINE_TXT_IN_CSV"])+" in your config)")
-        sys.exit(1)
 
 def extract_all(conf):
 
@@ -627,8 +615,7 @@ def extract_all(conf):
         try:
             os.makedirs(TARGET_PATH,exist_ok=True)
         except Exception as e:
-            print("ERROR: unable to create target folder '"+str(TARGET_PATH)+"': "+str(e))
-            sys.exit(1)
+            raise FileNotFoundError("unable to create target folder '"+str(TARGET_PATH)+"': "+str(e))
     
     rootElementInfo={"@id":conf["START_COLLECTION_ID"], "@type":"Collection"}
     collectionsEntryUrl=conf["DTS_URL"]+"/"+conf["DTS_COLLECTIONS_ENTRYPOINT"]
@@ -670,8 +657,11 @@ if __name__ == "__main__":
     if len(args.o)!=0:
         TARGET_PATH=args.o
 
-    confJson=loadConfig(args.configfile)
-    generatedFolder= extract_all(confJson)
+    try:
+        confJson=loadConfig(args.configfile)
+        generatedFolder= extract_all(confJson)
+    except Exception as e:
+        print("ERROR: "+str(e))
 
     sys.exit(0)
     

@@ -247,8 +247,9 @@ def end_screen():
             with st.spinner('EXTRACTING ... This might take some time, depending on target size'):
                 d2c.extract_all(json_output)
             st.success('CSV successfully extracted!')
-        except:
+        except Exception as e:            
             st.info('Sorry, the web version does not fully work yet! To run this app locally, download the Github repo, install Streamlit with pip install streamlit and run "streamlit run streamlitdtscsv.py" in a terminal in the dtscsv folder.')
+            st.error("Error while extracting contents: "+str(e))
         
 
     st.title('&#8593')
