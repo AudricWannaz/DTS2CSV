@@ -26,8 +26,8 @@ JSON file shall have following fields:
 For example { 'dts_id'="dts:extensions/ns1:language", "cvs_name"="language" } will extract parameter <root>/dts:extensions/ns1:language from json contents and store it in a 'language' column of the generated CSV file.
 For arrays, the <param>[n] syntax can be used to reach the nth element of the list (starting from 0).
 
- - *SAXON_JAR_PATH*: location in host of the saxon-he-10.5.jar file (see https://sourceforge.net/projects/saxon/files/Saxon-HE/)
- - *TEI_XSL_STYLESHEETS_PATH*: location in host of folder containing html5/html5.xsl and text/tei-to-text.xsl files (see https://github.com/TEIC/Stylesheets)
+ - *SAXON_JAR_PATH*: location in host of the saxon-he-10.5.jar file (see https://sourceforge.net/projects/saxon/files/Saxon-HE/). (optional, only needed for conversion of TEI files to text or html)
+ - *TEI_XSL_STYLESHEETS_PATH*: location in host of folder containing html5/html5.xsl and text/tei-to-text.xsl files (see https://github.com/TEIC/Stylesheets). (optional, only needed for conversion of TEI files to text or html)
  
 Full example:
 
