@@ -177,17 +177,17 @@ def extras():
         st.write('ROADMAP FEATURE')
     with st.expander('Personalise Graphics'):
         st.write('ROADMAP FEATURE')
-        st.write('wow such empty')    
+          
 
     st.write('*')
 
     st.title('HELP')
     with st.expander('What is DTS?'):
-        st.write('DTS is')
+        st.write('visit https://distributed-text-services.github.io/specifications/ to learn more about DTS')
     with st.expander('Why should I convert DTS to CSV?'):
-        st.write('The CSV format...')
+        st.write('The CSV format is very commonly used as a starting point for analytical tools, yet simple and accessible!')
     with st.expander('Can I use this tool from the terminal?'):
-        st.write('Yes! Go to ...')
+        st.write('Yes! Visit https://github.com/AudricWannaz/DTS2CSV/tree/main/dts2csv to learn how to use the tool locally from the terminal')
 
     st.title('ROADMAP')
     with st.expander('see roadmap'):
