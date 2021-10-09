@@ -171,7 +171,7 @@ def extras():
     st.title('SETTINGS')
 
     with st.expander('Streamlit Settings'):
-        st.write('This app is powered by Streamlit. This means you can access native Streamlit visual settings by clicking the top right corner of your screen.')
+        st.write('This app is powered by Streamlit. This means you can access native Streamlit visual settings by clicking the top right corner of your screen. This version has been made with the light mode in mind though!')
     with st.expander('Advanced Settings'):
     #with st.expander('Manage stored URLS'):
         st.write('ROADMAP FEATURE')
@@ -193,6 +193,7 @@ def extras():
     with st.expander('see roadmap'):
         roadmap_list = ['json input jumps from step I. to step V.','"next" and "reset" button at each screen', 'more complex json viewer', 'more help infos', 'better collections/resources input UI', 'user can change widget values in settings', 'dts2pdf collaboration', 'screencast tutorial']
         st.write(roadmap_list)
+        st.info('Have a recommandation for the roadmap? Write us on Github!')
 
 def closing_style():
     st.image('https://raw.githubusercontent.com/AudricWannaz/DTS2CSV/main/dts2csv/logo.png')
