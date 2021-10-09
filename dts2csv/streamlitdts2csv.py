@@ -274,7 +274,7 @@ def end_screen():
 
     with st.expander('more'):
         if st.button('export json config file'):
-            st.write('little bam')
+            st.info('ROADMAP FEATURE')
 
     if st.button('RESET APP'):
         st.info('ROADMAP FEATURE')
