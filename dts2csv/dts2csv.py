@@ -31,7 +31,7 @@ import textwrap
 from argparse import ArgumentParser, HelpFormatter
 
 
-VERSION="1.0"
+VERSION="2.0"
 
 # convention for MetaindeX to read multi-line contents from CSV
 MX_CSV_CR_MARKER="__CR__"
