@@ -277,7 +277,7 @@ def end_screen():
             st.write('little bam')
 
     if st.button('RESET APP'):
-        st.write('bim')
+        st.info('ROADMAP FEATURE')
     
 
 def mode_director():
