@@ -1,14 +1,12 @@
 # Overview
 
 DTS2CSV allows you to extract contents from a DTS API as local CSV file.
-It can also retrieve corresponding TEI files and, if Saxon and TEI-XSL are available on your computer, automatically convert them as Text and HTML files (and compute basic statistics out of textual version).
-
-In that last case, basic statistical info in generated (nbWords for example) and added to CSV contents.
+It can also retrieve corresponding TEI files and, if Saxon and TEI-XSL are available on your computer, automatically convert them as Text and HTML files (and compute basic statistics out of textual version, like words and lines counts for example).
 
 # Architecture
 
 ## Python Extractor
-dts2csv,py takes a JSON config file as input, and walk through DTS API to extract contents.
+dts2csv.py takes a JSON config file as input, and walk through DTS API to extract contents.
 
 JSON file shall have following fields:
 - __DTS_URL__: URL fo the DTS API server
