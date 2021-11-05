@@ -22,8 +22,8 @@ JSON file shall have following fields:
 - __COLLECTIONS__ and __RESOURCES__: list of custom json attributes to extract into CSV. Each element of the list shall be a dictionary with at least 'dts_id' field, and optionally 'csv_name' field.
 'dts_id' shall be the path to the required DTS attribute in the json file returned by the server, starting from json root, using '/' as separator (like a folders hierarchy for example). 
 For example **{ 'dts_id':"dts:extensions/ns1:language", "cvs_name":"language" }** will extract parameter at **json-root/dts:extensions/ns1:language** from json contents and store it in a '**language**' column of the generated CSV file. 
-For arrays, the [n] syntax can be used to reach the nth element of the list (starting from 0), for example: **dts:extensions/cts:description[0]/value**
-Additional 'mandatory' param can be set to 'True', in that case if corresponding dts_id is missing program will raise an error and stop.
+For arrays, the [n] syntax can be used to reach the nth element of the list (starting from 0), for example: **dts:extensions/cts:description[0]/value**.
+Additional 'mandatory' option can be set to 'True', in that case if corresponding dts_id is missing program will raise an error and stop.
 
  - __SAXON_JAR_PATH__: location in host of the saxon-he-10.5.jar file (see https://sourceforge.net/projects/saxon/files/Saxon-HE/). (optional, only needed for conversion of TEI files to text or html). If string '**HOME**' is used in the path (ex: "HOME/my/folder") it will be replaced by path to actual home folder of the user.
  - __TEI_XSL_STYLESHEETS_PATH__: location in host of folder containing html5/html5.xsl and text/tei-to-text.xsl files (see https://github.com/TEIC/Stylesheets). (optional, only needed for conversion of TEI files to text or html). If string '**HOME**' is used in the path (ex: "HOME/my/folder") it will be replaced by path to actual home folder of the user.
